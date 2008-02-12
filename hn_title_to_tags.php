@@ -3,7 +3,7 @@
 Plugin Name: Title to Tags
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 1.1
+Version: 1.2
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
@@ -38,10 +38,10 @@ function hn_title_to_tags($post_id) {
 	$verboten = explode(',', $exceptions);
 	$post = get_post($post_id);
 	$title_werdz = explode(' ', $post->post_title);
-	function lower_no_punc (&$werd, $key) {
+	function hn_lower_no_punc (&$werd, $key) {
 		$werd = strtolower(trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd)));
 	}
-	array_walk($verboten, 'lower_no_punc');
+	array_walk($verboten, 'hn_lower_no_punc');
 	foreach ($title_werdz as $werd) {
 		$werd = trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd));
 		if(!in_array(strtolower($werd), $verboten)) {
@@ -96,7 +96,7 @@ function hn_t2t_add_menu() {
 	add_options_page('Title to Tags', 'Title 2 Tags', 8, basename(__FILE__),'hn_title_to_tags_control');
 }
 	
-add_action('save_post', 'hn_title_to_tags');
+add_action('save_post', 'hn_title_to_tags', 2);
 add_action('admin_menu', 'hn_t2t_add_menu');
 
 
