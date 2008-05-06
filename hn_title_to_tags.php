@@ -3,7 +3,7 @@
 Plugin Name: Title to Tags
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 1.4
+Version: 1.5
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
