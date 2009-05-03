@@ -63,6 +63,10 @@ This plugin will put tags on any post that is opened in the Write screen and the
 * 1.2 ~ Name collision with another plugin, FeedWordPress, corrected
 * 1.3 ~ Whoops!  Didn't put the title in the meta data, how silly!
 * 1.4 ~ SVN commit to include tag
+* 2.0 ~ Revamped version based on experiments with these function in another plugin.
+		~ using WP-style function notes
+		~ designed to work with both WP and WPMU
+		~ lowerNoPunc function now removes posessive 's from words
 
 == Acknowledgements ==
 
