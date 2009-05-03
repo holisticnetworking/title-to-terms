@@ -67,6 +67,7 @@ This plugin will put tags on any post that is opened in the Write screen and the
 		~ using WP-style function notes
 		~ designed to work with both WP and WPMU
 		~ lowerNoPunc function now removes posessive 's from words
+		~ addresses issue where tags are created even if they're not added to the post
 
 == Acknowledgements ==
 
