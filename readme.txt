@@ -1,9 +1,9 @@
 === Titles to Tags ===
 Contributors: dragonflyeye
 Tags: tags, titles, automation
-Requires at least: 2.3.x
-Tested up to: 2.3.2
-Stable tag: 1.5
+Requires at least: 2.7
+Tested up to: 2.7.1
+Stable tag: 2.0
 
 This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
 

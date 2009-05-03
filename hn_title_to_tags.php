@@ -3,7 +3,7 @@
 Plugin Name: Title to Tags
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 1.5
+Version: 2.0
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
@@ -25,44 +25,85 @@ Author URI: http://holisticnetworking.net
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+/*
+Change Log:
+0.0 - 1.x ~ Lost the updates!  Dunno what happened. . . 
+2.0 ~ Revamped version based on experiments with these function in another plugin.
+		~ using WP-style function notes
+		~ designed to work with both WP and WPMU
+		~ lowerNoPunc function now removes posessive 's from words
+*/
 
-function hn_title_to_tags($post_id) {
-    if(!wp_get_post_tags($post_id)) {
-	$options = get_option('hn_title_to_tags');
-		if ( !is_array($options) ) {
-			$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
-			$defaults = file_get_contents($stopwords);
-			$options = array('hnt2t_exceptions'=>$defaults);
+/**
+ * Gather keywords from title and create post tags for them
+ *
+ * @uses wp_set_post_tags()
+ *
+ * @param int $post_id Post ID.
+ */
+function titleToTags($post_id) {
+	// Fix for auto-save and revision IDs:
+	if(wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)){
+		return $post_id;
+	} else {
+		$post = get_post($post_id);
+		$title = $post->post_title;
+		$stopwords = get_option('hn_title_to_tags');
+		// do we have stopwords in the db?  If not, use the default list:
+		if ( !$stopwords ) {
+			$file = dirname(__FILE__).'/hn_t2t/stopwords.txt';
+			$defaults = file_get_contents($file);
+			$stopwords = $defaults;
+			update_option('hn_title_to_tags', $stopwords);
 		}
-	$exceptions = $options['hnt2t_exceptions'];
-	$verboten = explode(',', $exceptions);
-	$post = get_post($post_id);
-	$title_werdz = explode(' ', $post->post_title);
-	function hn_lower_no_punc (&$werd, $key) {
-		$werd = strtolower(trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd)));
-	}
-	array_walk($verboten, 'hn_lower_no_punc');
-	foreach ($title_werdz as $werd) {
-		$werd = trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd));
-		if(!in_array(strtolower($werd), $verboten)) {
-			$tags[] = $werd;
+		// get our array of stop words and words in the title.  Compare arrays and select tags:
+		$verboten = explode(',', $stopwords);
+		$title_werdz = explode(' ', $title);
+		for($x = 0; $x < count($verboten); $x++) {
+			$verboten[$x] = lowerNoPunc($verboten[$x]);
 		}
+		foreach ($title_werdz as $werd) {
+			$werd = lowerNoPunc($werd); //trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd));
+			if(!in_array($werd, $verboten)) {
+				$tags[] = $werd;
+			}
+		}
+		// Finally, add the tags to the post
+		wp_add_post_tags($post_id, $tags);
 	}
-	wp_add_post_tags($post_id, $tags);
-    }
 }
-
-function hn_title_to_tags_control() {
+	
+	
+	
+/**
+ * Convert words to all lower case, eliminate punctuation, remove posessives
+ *
+ * @param string $werd the word to be converted
+ * @return string converted word
+ */
+function lowerNoPunc($werd) {
+	if(stristr($werd, "'s")) {
+		$sploded = explode("'", $werd);
+		$werd = $sploded[0];
+	}
+	$werd = strtolower(trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd)));
+	return $werd;
+}
+	
+	
+	
+function titleToTags_control() {
 
 	// Get our options and see if we're handling a form submission.
 	$options = get_option('hn_title_to_tags');
-	$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
 	if ( !is_array($options) ){
+		$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
 		$defaults = file_get_contents($stopwords);
 		$options = array('hnt2t_exceptions'=>$defaults);
 	}
 	if ( $_POST['hnt2t-submit'] ) {
 		if ($_POST['hnt2t_reset'] == 1) {
+			$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
 			$options['hnt2t_exceptions'] = file_get_contents($stopwords);	
 		}
 		else { $options['hnt2t_exceptions'] = strip_tags(stripslashes($_POST['hnt2t_exceptions'])); }
@@ -93,10 +134,10 @@ function hn_title_to_tags_control() {
 }
 
 function hn_t2t_add_menu() {
-	add_options_page('Title to Tags', 'Title 2 Tags', 8, basename(__FILE__),'hn_title_to_tags_control');
+	add_options_page('Title to Tags', 'Title 2 Tags', 8, basename(__FILE__),'titleToTags_control');
 }
 	
-add_action('save_post', 'hn_title_to_tags', 2);
+add_action('save_post', 'titleToTags', 2);
 add_action('admin_menu', 'hn_t2t_add_menu');
 
 
