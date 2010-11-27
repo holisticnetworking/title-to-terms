@@ -3,7 +3,7 @@
 Plugin Name: Title to Tags
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 2.1
+Version: 3.0
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
@@ -36,60 +36,53 @@ class titleToTags {
 	*/
 	public function convert($post_id) {
 		// Fix for auto-save and revision IDs:
-		if(wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)){
+		if(wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) :
 			return $post_id;
-		} else {
+		else :
 			// Get the post:
 			$post = get_post($post_id);
-			if(wp_get_post_tags($post_id)) {
-				return false;
-			}
-			// Setup our tag data:
-			$title_to_tags	= array();
-			$stopwords = get_option('hn_title_to_tags');
-			$title = $post->post_title;
-			// do we have stopwords in the db?  If not, use the default list:
-			if ( !$stopwords ) {
-				$file = dirname(__FILE__).'/hn_t2t/stopwords.txt';
-				$defaults = file_get_contents($file);
-				$stopwords = $defaults;
-				update_option('hn_title_to_tags', $stopwords);
-			}
-			// get our array of stop words and words in the title.  Compare arrays and select tags:
-			$verboten = explode(',', $stopwords);
-			$title_werdz = explode(' ', $title);
-			for($x = 0; $x < count($verboten); $x++) {
-				$verboten[$x] = $this->lowerNoPunc($verboten[$x]);
-			}
-			foreach ($title_werdz as $werd) {
-				$werd = $this->lowerNoPunc($werd); //trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd));
-				if(!in_array($werd, $verboten)) {
-					$title_to_tags[] = $werd;
-				}
-			}
-			// Finally, add the tags to the post
-			wp_add_post_tags($post_id, $title_to_tags);
-		}
+			if($title = $post->post_title) :
+				// This is a total cluge, but it works. There must be a better post status to use, but haven't found it yet.
+				if($title != 'Auto Draft') :
+					// We only commit new post tags if there are no previous post tags:
+					if(!wp_get_post_tags($post_id)) :
+						// Setup our tag data:
+						$title_to_tags	= array();
+						$stopwords		= $this->getStopWords();
+						$title_werdz	= explode(' ', $title);
+						foreach ($title_werdz as $werd) :
+							$werd = $this->lowerNoPunc($werd);
+							if(!in_array($werd, $stopwords)) :
+								$title_to_tags[] = $werd;
+							endif;
+						endforeach;
+						// Finally, add the tags to the post
+						wp_add_post_tags($post_id, $title_to_tags);
+					endif;
+				endif;
+			endif;
+		endif;
 	}
 	
 	
 	public function control() {
 		// Get our options and see if we're handling a form submission.
 		$options = get_option('hn_title_to_tags');
-		if ( !is_array($options) ){
+		if ( !is_array($options) ) :
 			$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
 			$defaults = file_get_contents($stopwords);
 			$options = array('hnt2t_exceptions'=>$defaults);
-		}
-		if ( isset($_POST['hnt2t-submit']) ) {
-			if ($_POST['hnt2t_reset'] == 1) {
+		endif;
+		if ( isset($_POST['hnt2t-submit']) ) :
+			if (isset($_POST['hnt2t_reset'])) :
 				$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
 				$options['hnt2t_exceptions'] = file_get_contents($stopwords);	
-			}
-			else { $options['hnt2t_exceptions'] = strip_tags(stripslashes($_POST['hnt2t_exceptions'])); }
+			else : 
+				$options['hnt2t_exceptions'] = strip_tags(stripslashes($_POST['hnt2t_exceptions']));
+			endif;
 			update_option('hn_title_to_tags', $options);
 			?><div id='message' class='updated fade'><p><strong>Title to Tags exception list updated!</strong></p></div><?php
-		}
+		endif;
 
 		// Be sure you format your options to be valid HTML attributes.
 		$exceptions = htmlspecialchars($options['hnt2t_exceptions'], ENT_QUOTES);
@@ -117,7 +110,7 @@ class titleToTags {
 	}
 	
 	function __construct() {
-		add_action('save_post', array(&$this, 'convert'), 2);
+		add_action('save_post', array(&$this, 'convert'));
 		add_action('admin_menu', array(&$this, 'addMenu'));
 	}
 	
@@ -125,12 +118,34 @@ class titleToTags {
 	// lowerNoPunc:				Converts all words into lower-case words, sans punctuation or possessives.
 	*/
 	private function lowerNoPunc($werd) {
-		if(stristr($werd, "'s")) {
+		if(stristr($werd, "'s")) :
 			$sploded = explode("'", $werd);
 			$werd = $sploded[0];
-		}
+		endif;
 		$werd = strtolower(trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd)));
 		return $werd;
+	}
+	
+	
+	/*
+	// getStopWords:			Gets and sets the current array of stop words. By default, grabs the included text file and produces.
+	//							an array from that, to be saved to the options table.
+	*/
+	private function getStopWords() {
+		// Do we have stopwords in the db?
+		if($stopwords = get_option('hn_title_to_tags')) :
+			return $stopwords;
+		// If not, use the default list:
+		else :
+			$file 			= dirname(__FILE__).'/stopwords.txt';
+			$stopwords		= file_get_contents($file);
+			$verboten		= explode(',', $stopwords);
+			for($x = 0; $x < count($verboten); $x++) :
+				$verboten[$x]	= $this->lowerNoPunc($verboten[$x]);
+			endfor;
+			update_option('hn_title_to_tags', $verboten);
+			return $verboten;
+		endif;
 	}
 }
 ?>

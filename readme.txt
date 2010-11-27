@@ -2,8 +2,8 @@
 Contributors: dragonflyeye
 Tags: tags, titles, automation
 Requires at least: 2.7
-Tested up to: 2.7.1
-Stable tag: 2.1
+Tested up to: 3.1
+Stable tag: 3.0
 
 This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
 
@@ -72,6 +72,7 @@ This plugin will put tags on any post that is opened in the Write screen and the
 		~ Use of the deprecated number-based roles in the add_options_menu() call has been fixed.
 		~ Added isset() check to form submission check. Whoops! Error checking not turned on.
 		~ NOTE: I am aware of the issue with this plugin not working in 3.0 and the next release will correct this issue. This will probably make the plugin inoperable for <3.0. Please upgrade your system to continue using this plugin.
+* 3.0 ~ Converted to WordPress 3.0-compatible code. Not sure how this will affect the 2.x users out there, but will make a branch in SVN just in case.
 
 == Acknowledgements ==
 
