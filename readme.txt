@@ -1,7 +1,8 @@
 === Titles to Tags ===
 Contributors: dragonflyeye
+Donate Link: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Tags: tags, titles, automation
-Requires at least: 2.7
+Requires at least: 3.0
 Tested up to: 3.1
 Stable tag: 3.0
 
@@ -50,6 +51,11 @@ Yes.  In the Options page for the plugin, there is a check box for "Reset all ig
 = Will this plugin put tags on my old posts? =
 
 This plugin will put tags on any post that is opened in the Write screen and then saved, assuming there aren't already tags on the post.  However, there is no system in place to do this as a batch file, since in some instances, this would probably be more strain on the server than it's really worth.  If you really need to get this done, I'm sure there's a way to create another script that opens and saves each un-tagged post, but that's not something I'm looking into.
+
+= Does this plugin work with versions less than 3.1? =
+
+The most recent release of this plugin was designed to handle 3.0 and above. It has not been tested below 3.0, however, there is a branched version in SVN that will work with versions greater than 2.7:
+http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
 
 == Screenshots ==
 
