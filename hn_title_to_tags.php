@@ -3,7 +3,7 @@
 Plugin Name: Title to Tags
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 3.0
+Version: 3.0.1
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
@@ -66,13 +66,6 @@ class titleToTags {
 	
 	
 	public function control() {
-		// Get our options and see if we're handling a form submission.
-		$options = get_option('hn_title_to_tags');
-		if ( !is_array($options) ) :
-			$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
-			$defaults = file_get_contents($stopwords);
-			$options = array('hnt2t_exceptions'=>$defaults);
-		endif;
 		if ( isset($_POST['hnt2t-submit']) ) :
 			if (isset($_POST['hnt2t_reset'])) :
 				$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
@@ -83,18 +76,18 @@ class titleToTags {
 			update_option('hn_title_to_tags', $options);
 			?><div id='message' class='updated fade'><p><strong>Title to Tags exception list updated!</strong></p></div><?php
 		endif;
-
-		// Be sure you format your options to be valid HTML attributes.
-		$exceptions = htmlspecialchars($options['hnt2t_exceptions'], ENT_QUOTES);
+		
+		$exceptions	= $this->getStopWords();
 	
 		// Begin form output
 	?>
 	<div class="wrap">
 	<h2>Title to Tags</h2>
+		<?php include_once('hnblurb.php'); ?>
 		<form id="hn_title_to_tags" name="hn_title_to_tags" method="post" action="options-general.php?page=hn_title_to_tags.php">
 		<h3>Excluded Words</h3>
 		<p>These words will be ignored by Title to Tags</p>
-		<textarea rows="6" cols="100" name="hnt2t_exceptions" id="hnt2t_exceptions"><?php echo($exceptions); ?></textarea>
+		<textarea rows="6" cols="100" name="hnt2t_exceptions" id="hnt2t_exceptions"><?php echo(implode(', ', $exceptions)); ?></textarea>
 		<h3>Reset Excluded Words</h3>
 		<p><strong>Warning!!</strong>  Setting this option will restore your ignore list to it's original state and delete any entries you may have made.  Please only use this option when you are <strong>sure</strong> you want to reset!</p>
 		<input type="checkbox" name="hnt2t_reset" id="hnt2t_reset" value="1"><label for="hnt2t_reset">Reset all ignore words to defaults</label><br /><br />

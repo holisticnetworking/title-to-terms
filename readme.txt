@@ -4,7 +4,7 @@ Donate Link: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags
 Tags: tags, titles, automation
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 3.0
+Stable tag: 3.0.1
 
 This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
 
@@ -79,6 +79,7 @@ http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
 		~ Added isset() check to form submission check. Whoops! Error checking not turned on.
 		~ NOTE: I am aware of the issue with this plugin not working in 3.0 and the next release will correct this issue. This will probably make the plugin inoperable for <3.0. Please upgrade your system to continue using this plugin.
 * 3.0 ~ Converted to WordPress 3.0-compatible code. Not sure how this will affect the 2.x users out there, but will make a branch in SVN just in case.
+* 3.0.1 ~ Noticed some improvements to be made to the efficiency of the code. getStopWords is now the only function used to get the stop words anywhere they appear (formerly using get_option directly).
 
 == Acknowledgements ==
 
