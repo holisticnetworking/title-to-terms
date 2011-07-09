@@ -3,7 +3,7 @@
 Plugin Name: Title to Tags
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 3.0.1
+Version: 3.1
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
@@ -24,121 +24,85 @@ Author URI: http://holisticnetworking.net
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+new titleToTags;
 
-// Get out there and rock and roll the bones:
-$tt	= new titleToTags();
-
-class titleToTags {
-
-	/*
-	// convert:				Does the business of converting titles to tags.
-	// @var int $post_id:	The ID of the post whose title is in need of conversion.
-	*/
-	public function convert($post_id) {
-		// Fix for auto-save and revision IDs:
-		if(wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) :
-			return $post_id;
-		else :
-			// Get the post:
-			$post = get_post($post_id);
-			if($title = $post->post_title) :
-				// This is a total cluge, but it works. There must be a better post status to use, but haven't found it yet.
-				if($title != 'Auto Draft') :
-					// We only commit new post tags if there are no previous post tags:
-					if(!wp_get_post_tags($post_id)) :
-						// Setup our tag data:
-						$title_to_tags	= array();
-						$stopwords		= $this->getStopWords();
-						$title_werdz	= explode(' ', $title);
-						foreach ($title_werdz as $werd) :
-							$werd = $this->lowerNoPunc($werd);
-							if(!in_array($werd, $stopwords)) :
-								$title_to_tags[] = $werd;
-							endif;
-						endforeach;
-						// Finally, add the tags to the post
-						wp_add_post_tags($post_id, $title_to_tags);
+class titleToTags {	
+	
+	// Convert titles to tags on save:
+	function convert($post_id) {
+		$post	= get_post(wp_is_post_revision($post_id));
+		// No title? No point in going any further:
+		if(isset($post->post_title)) :
+			$title	= $post->post_title;
+			// Only run if there are not already tags assigned to the post:
+			if(!wp_get_post_tags($post_id)) :
+				// Setup our tag data:
+				$title_to_tags	= array();
+				$stopwords		= $this->getStopWords();
+				$title_werdz	= explode(' ', $title);
+				foreach ($title_werdz as $werd) :
+					$werd = $this->lowerNoPunc($werd);
+					if(!in_array($werd, $stopwords) && !in_array($werd, $this->wp_stop)) :
+						$title_to_tags[] = $werd;
 					endif;
-				endif;
+				endforeach;
+				// Finally, add the tags to the post
+				wp_add_post_tags($post_id, $title_to_tags);
 			endif;
 		endif;
 	}
 	
+	// Display options page:
+	function addMenu() {
+		add_settings_field(
+			$id = 'stop_words',
+			$title = "Title to Tags ignored words",
+			$callback = array( &$this, 'stop_words' ),
+			$page = 'writing'
+			);
+		register_setting( $option_group = 'writing', $option_name = 'stop_words' );
+	}
 	
-	public function control() {
-		if ( isset($_POST['hnt2t-submit']) ) :
-			if (isset($_POST['hnt2t_reset'])) :
-				$stopwords = dirname(__FILE__).'/hn_t2t/stopwords.txt';
-				$options['hnt2t_exceptions'] = file_get_contents($stopwords);	
-			else : 
-				$options['hnt2t_exceptions'] = strip_tags(stripslashes($_POST['hnt2t_exceptions']));
-			endif;
-			update_option('hn_title_to_tags', $options);
-			?><div id='message' class='updated fade'><p><strong>Title to Tags exception list updated!</strong></p></div><?php
+	function stop_words() {
+		$values	= get_option('stop_words');
+		if(strlen($values) < 1) :
+			$values	= implode(', ', $this->getStopWords());
 		endif;
-		
-		$exceptions	= $this->getStopWords();
-	
-		// Begin form output
-	?>
-	<div class="wrap">
-	<h2>Title to Tags</h2>
-		<?php include_once('hnblurb.php'); ?>
-		<form id="hn_title_to_tags" name="hn_title_to_tags" method="post" action="options-general.php?page=hn_title_to_tags.php">
-		<h3>Excluded Words</h3>
-		<p>These words will be ignored by Title to Tags</p>
-		<textarea rows="6" cols="100" name="hnt2t_exceptions" id="hnt2t_exceptions"><?php echo(implode(', ', $exceptions)); ?></textarea>
-		<h3>Reset Excluded Words</h3>
-		<p><strong>Warning!!</strong>  Setting this option will restore your ignore list to it's original state and delete any entries you may have made.  Please only use this option when you are <strong>sure</strong> you want to reset!</p>
-		<input type="checkbox" name="hnt2t_reset" id="hnt2t_reset" value="1"><label for="hnt2t_reset">Reset all ignore words to defaults</label><br /><br />
-		<input type="submit" name="submit" id="submit" value="submit" />
-		<input type="hidden" id="hnt2t-submit" name="hnt2t-submit" value="1" />
-		</form>
-	</div>
-	<?php
+		echo '
+		<p>These words will be ignored by Title to Tags (punctuation removed). <em>To reset, simply delete all values here and the default list will be restored.</em></p>
+		<textarea rows="6" cols="100" name="stop_words" id="stop_words">' . $values . '</textarea>
+		';
 	}
 	
-	public function addMenu() {
-		add_options_page('Title to Tags', 'Title 2 Tags', 'edit_posts', basename(__FILE__), array( &$this, 'control'));
+	// Gets the stop word list:
+	private function getStopWords() {
+		$vals			= array();
+		$file 			= dirname(__FILE__).'/stopwords.txt';
+		$stopwords		= explode(',', file_get_contents($file));
+		foreach($stopwords as $word) :
+			$vals[]	= $this->lowerNoPunc($word);
+		endforeach;
+		return $vals;
 	}
 	
-	function __construct() {
-		add_action('save_post', array(&$this, 'convert'));
-		add_action('admin_menu', array(&$this, 'addMenu'));
-	}
-	
-	/*
-	// lowerNoPunc:				Converts all words into lower-case words, sans punctuation or possessives.
-	*/
+	// Converts all words into lower-case words, sans punctuation or possessives.
 	private function lowerNoPunc($werd) {
-		if(stristr($werd, "'s")) :
-			$sploded = explode("'", $werd);
-			$werd = $sploded[0];
-		endif;
 		$werd = strtolower(trim(preg_replace('#[^\p{L}\p{N}]+#u', '', $werd)));
 		return $werd;
 	}
 	
+	// List of WP-specific stop words (draft, etc)
+	private $wp_stop	= array('draft', 'auto');
 	
-	/*
-	// getStopWords:			Gets and sets the current array of stop words. By default, grabs the included text file and produces.
-	//							an array from that, to be saved to the options table.
-	*/
-	private function getStopWords() {
-		// Do we have stopwords in the db?
-		if($stopwords = get_option('hn_title_to_tags')) :
-			return $stopwords;
-		// If not, use the default list:
-		else :
-			$file 			= dirname(__FILE__).'/stopwords.txt';
-			$stopwords		= file_get_contents($file);
-			$verboten		= explode(',', $stopwords);
-			for($x = 0; $x < count($verboten); $x++) :
-				$verboten[$x]	= $this->lowerNoPunc($verboten[$x]);
-			endfor;
-			update_option('hn_title_to_tags', $verboten);
-			return $verboten;
-		endif;
+	// Self-referencing constructor method method:
+	function titleToTags() {
+		$this->__construct();
+	}
+	
+	// Get out there and rock and roll the bones:
+	function __construct() {
+		add_action('save_post', array(&$this, 'convert'));
+		add_action('admin_menu', array(&$this, 'addMenu'));
 	}
 }
 ?>
