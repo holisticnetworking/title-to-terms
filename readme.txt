@@ -4,13 +4,13 @@ Donate Link: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags
 Tags: tags, titles, automation
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 3.0.1
+Stable tag: 3.1
 
 This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
 
 == Description ==
 
-This plugin automatically converts keywords in a post title to tags upon saving.  It includes a user-editable list of words you want the plugin to ignore, which by default includes the more obviously-useless words like "I" or "wasn't."  You can also reset the list back to defaults by checking a box in the config page.
+This plugin automatically converts keywords in a post title to tags upon saving.  It includes a user-editable list of words you want the plugin to ignore, which by default includes the more obviously-useless words like "I" or "wasn't."  You can also reset the list back to defaults by deleting the current list.
 
 *   Converts keywords in post titles to tags
 *   Includes user-editable list of words to be ignored
@@ -18,23 +18,21 @@ This plugin automatically converts keywords in a post title to tags upon saving.
 *   Converts on save, not publish.
 *   Does not convert if there are already tags assigned.
 
-WPMU adminstrators take note: this plugin is especially helpful if you're building a community-based site where tagging is important and your bloggers are not always diligent about tagging.
+Multi-blog adminstrators take note: this plugin is especially helpful if you're building a community-based site where tagging is important and your bloggers are not always diligent about tagging.
 
 == Installation ==
 
 Very simple, very easy:
 
-1.  Extract the zip file and upload both the hn_title_to_tags.php file and the hn_t2t directory to your web server
-   a.  In WordPress, upload to /plugins
-   b.  In WPMU, upload to the /mu-plugins for automatic site-wide activation.  Obviously, skip step 2
-2.  Activate plugin by going to the Plugins section of your Control Panel
-3.  Configure the plugin by going to Options > Title 2 Tags in your Control Panel
+1.  Extract the zip file and upload the title_to_tags folder to your /wp-content/plugins directory.
+2.  Activate plugin by going to the Plugins section of your Control Panel.
+3.  Configure the plugin by going to Settings -> Writing in your Control Panel.
 
 == Frequently Asked Questions ==
 
 = Does this plugin convert all words in the title? =
 
-No.  There is a user-configurable list of stop words, pre-populated with a host of common words, which can be used to fine-tune the resulting tags.  Words like "and" or "myself" are excluded by default, but there might be other words which are germane to your blog which don't make for good tags.  You might, for example, want to add the name of your blog to the list, to avoid an over loaded tag with no real meaning.
+No.  There is a user-configurable list of stop words, pre-populated with a host of common words, which can be used to fine-tune the resulting tags.
 
 = Will this plugin overwrite my existing tags? =
 
@@ -42,15 +40,15 @@ No.  The plugin checks for the existence of tags, and if there are none, writes 
 
 = When are the tags added?  At publish or save? =
 
-Tags are added to the post the first time it is saved, but not when the post is autosaved.  In many cases, the first save may well be publish.  In this case, the tags are added at that time.
+Tags are added to the post when it is saved, whether as a draft, update or by publishing, but not when the post is autosaved.
 
-= Is there a way to reset the list of stop words back to the original? =
+= Is there a way to reset the list of ignored words back to the original? =
 
-Yes.  In the Options page for the plugin, there is a check box for "Reset all ignore words to defaults."  Clicking that checkbox and hitting "submit" will restore the original list of ignored words.  **BE CAREFUL!**  There is no way to undo this process.
+Yes. Simply delete the current list of stop words, and Title to Tags will replace the list with its default stop words collection (stopwords.txt)
 
 = Will this plugin put tags on my old posts? =
 
-This plugin will put tags on any post that is opened in the Write screen and then saved, assuming there aren't already tags on the post.  However, there is no system in place to do this as a batch file, since in some instances, this would probably be more strain on the server than it's really worth.  If you really need to get this done, I'm sure there's a way to create another script that opens and saves each un-tagged post, but that's not something I'm looking into.
+Maybe. It will not handle the process automatically, but if you open any untagged post and save it, Titles to Tags will work.
 
 = Does this plugin work with versions less than 3.1? =
 
@@ -60,7 +58,7 @@ http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
 == Screenshots ==
 
 1. The Plugins page showing the Title to Tags plugin pre-activation.
-2. The Title to Tags Options page.
+2. The Title to Tags settings on the Writing page.
 
 == Version History ==
 
