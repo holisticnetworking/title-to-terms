@@ -1,10 +1,9 @@
 === Titles to Tags ===
 Contributors: dragonflyeye
-Donate Link: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Tags: tags, titles, automation
 Requires at least: 3.0
-Tested up to: 3.1
-Stable tag: 3.1
+Tested up to: 3.7.2
+Stable tag: 3.2
 
 This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
 
@@ -19,6 +18,9 @@ This plugin automatically converts keywords in a post title to tags upon saving.
 *   Does not convert if there are already tags assigned.
 
 Multi-blog adminstrators take note: this plugin is especially helpful if you're building a community-based site where tagging is important and your bloggers are not always diligent about tagging.
+
+WP banner photo credit: Sarah Bresnahan on Flickr (CC licensed)
+http://www.flickr.com/photos/sjbresnahan/4087585005/sizes/o/in/photolist-7ecWBx-7egQk9-6JvPPE-6JrJbB-8pnP89-6vTRJU-Fv4Vf-bUUTad-6UrYUY-8H8P4N-f7MqAR-6kcugT-ceuhxY-4YCw2W-e1tJ5X-7h6Si1-9SKEiC-6rPyjP-f4y8VP-29Xa3H-6w1QVu-bE8ArQ-bT3mtc-bT3m7p-bE8ANW-5fFT4a-PCDgy-PCDg5-bTdrSp-4stkJX-4sxnZo-8H8Qru-f82DeA-4VaRUY-nw9vn-f7Mv9e-81XHfC-bX7VFg-53weBC-zzoQA-aiZtUG-8kTNpR-68awX8-5mR9EQ-e1JMNH-4V6Co8-6eqCTy-4VaRRY-9Fafo-6KP53J-9Faf6/
 
 == Installation ==
 
@@ -78,6 +80,7 @@ http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
 		~ NOTE: I am aware of the issue with this plugin not working in 3.0 and the next release will correct this issue. This will probably make the plugin inoperable for <3.0. Please upgrade your system to continue using this plugin.
 * 3.0 ~ Converted to WordPress 3.0-compatible code. Not sure how this will affect the 2.x users out there, but will make a branch in SVN just in case.
 * 3.0.1 ~ Noticed some improvements to be made to the efficiency of the code. getStopWords is now the only function used to get the stop words anywhere they appear (formerly using get_option directly).
+* 3.2 ~ Rearranging a lot of the code, user-defined stop words were being ignored.
 
 == Acknowledgements ==
 

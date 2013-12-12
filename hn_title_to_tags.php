@@ -3,12 +3,12 @@
 Plugin Name: Title to Tags
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 3.1
+Version: 3.2
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
 
-/*  Copyright 2006  Thomas J Belknap  (email : dragonfly@dragonflyeye.net)
+/*  Copyright 2013  Thomas J Belknap  (email : tbelknap@holisticnetworking.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,24 +30,27 @@ class titleToTags {
 	
 	// Convert titles to tags on save:
 	function convert($post_id) {
-		$post	= get_post(wp_is_post_revision($post_id));
+		$stopwords	= $this->getStopWords();
+		$append	 	= get_option('t2t_append');
+		
+		$post		= get_post(wp_is_post_revision($post_id));
 		// No title? No point in going any further:
 		if(isset($post->post_title)) :
-			$title	= $post->post_title;
-			// Only run if there are not already tags assigned to the post:
-			if(!wp_get_post_tags($post_id)) :
-				// Setup our tag data:
-				$title_to_tags	= array();
-				$stopwords		= $this->getStopWords();
-				$title_werdz	= explode(' ', $title);
-				foreach ($title_werdz as $werd) :
-					$werd = $this->lowerNoPunc($werd);
-					if(!in_array($werd, $stopwords) && !in_array($werd, $this->wp_stop)) :
-						$title_to_tags[] = $werd;
-					endif;
-				endforeach;
-				// Finally, add the tags to the post
-				wp_add_post_tags($post_id, $title_to_tags);
+			// Setup our tag data:
+			$title_to_tags	= array();
+			$title_werdz	= explode( ' ', $post->post_title );
+			foreach ($title_werdz as $werd) :
+				$werd = $this->lowerNoPunc($werd);
+				if(!in_array($werd, $stopwords) && !in_array($werd, $this->wp_stop)) :
+					$title_to_tags[] = $werd;
+				endif;
+			endforeach;
+			
+			// Append or complete. Do not replace:
+			if( $append ) :
+				wp_set_post_tags($post_id, $title_to_tags, true);
+			elseif(!wp_get_post_tags($post_id)) :
+				wp_set_post_tags($post_id, $title_to_tags, true);
 			endif;
 		endif;
 	}
@@ -56,11 +59,18 @@ class titleToTags {
 	function addMenu() {
 		add_settings_field(
 			$id = 'stop_words',
-			$title = "Title to Tags ignored words",
+			$title = "Title to Tags: ignored words",
 			$callback = array( &$this, 'stop_words' ),
 			$page = 'writing'
 			);
+		add_settings_field(
+			$id = 't2t_append',
+			$title = "Title to Tags: append tags",
+			$callback = array( &$this, 'append' ),
+			$page = 'writing'
+			);
 		register_setting( $option_group = 'writing', $option_name = 'stop_words' );
+		register_setting( $option_group = 'writing', $option_name = 't2t_append' );
 	}
 	
 	function stop_words() {
@@ -74,15 +84,33 @@ class titleToTags {
 		';
 	}
 	
+	function append() {
+		$value	= get_option('t2t_append');
+		$checked	= ( $value ) ? 'checked="checked"' : '';
+		echo '
+		<p>Choose whether to add tags to untagged content, or to append new Title 2 Tags, even if there are tags already present.</p>
+		<input type="checkbox" name="t2t_append" id="t2t_append" ' . $checked . ' /> append Title to Tags to preexisting tags.
+		';
+	}
+	
 	// Gets the stop word list:
 	private function getStopWords() {
-		$vals			= array();
-		$file 			= dirname(__FILE__).'/stopwords.txt';
-		$stopwords		= explode(',', file_get_contents($file));
-		foreach($stopwords as $word) :
-			$vals[]	= $this->lowerNoPunc($word);
+		$stopwords	= array();
+		// Try the current options first:
+		$vals		= get_option('stop_words');
+		// Otherwise, grab the default list:
+		if( empty( $vals ) ) :
+			$file 			= dirname(__FILE__).'/stopwords.txt';
+			$vals			= file_get_contents($file);
+		endif;
+		
+		// Explode the list and trim values:
+		$vals		= explode( ',', $vals );
+		foreach($vals as $word) :
+			$stopwords[]	= $this->lowerNoPunc($word);
 		endforeach;
-		return $vals;
+		
+		return $stopwords;
 	}
 	
 	// Converts all words into lower-case words, sans punctuation or possessives.
@@ -93,11 +121,6 @@ class titleToTags {
 	
 	// List of WP-specific stop words (draft, etc)
 	private $wp_stop	= array('draft', 'auto');
-	
-	// Self-referencing constructor method method:
-	function titleToTags() {
-		$this->__construct();
-	}
 	
 	// Get out there and rock and roll the bones:
 	function __construct() {
