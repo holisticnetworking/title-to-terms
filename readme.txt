@@ -2,7 +2,7 @@
 Contributors: dragonflyeye
 Tags: tags, titles, automation
 Requires at least: 3.0
-Tested up to: 3.7.2
+Tested up to: 3.8
 Stable tag: 3.2
 
 This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
