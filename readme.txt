@@ -7,7 +7,7 @@ Stable tag: 3.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
+Keep forgetting to add tags to your posts? Let Title to Tags convert keywords automatically!
 
 == Description ==
 
