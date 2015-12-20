@@ -2,8 +2,13 @@
 Contributors: dragonflyeye
 Tags: tags, titles, automation
 Requires at least: 3.0
+<<<<<<< HEAD
 Tested up to: 3.8
 Stable tag: 3.2
+=======
+Tested up to: 4.3
+Stable tag: 3.3
+>>>>>>> f9891f5b3e5eb99b66b7643e6b0740e0f27d06e1
 
 This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
 
@@ -32,6 +37,12 @@ Very simple, very easy:
 
 == Frequently Asked Questions ==
 
+<<<<<<< HEAD
+=======
+= How Can I Contribute? =
+The plugin is now being maintained on GitHub, so please do contribute all your questions, comments, suggestions, fixes and improvements with me [here](https://github.com/holisticnetworking/title-to-tags).
+
+>>>>>>> f9891f5b3e5eb99b66b7643e6b0740e0f27d06e1
 = Does this plugin convert all words in the title? =
 
 No.  There is a user-configurable list of stop words, pre-populated with a host of common words, which can be used to fine-tune the resulting tags.
@@ -80,7 +91,13 @@ http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
 		~ NOTE: I am aware of the issue with this plugin not working in 3.0 and the next release will correct this issue. This will probably make the plugin inoperable for <3.0. Please upgrade your system to continue using this plugin.
 * 3.0 ~ Converted to WordPress 3.0-compatible code. Not sure how this will affect the 2.x users out there, but will make a branch in SVN just in case.
 * 3.0.1 ~ Noticed some improvements to be made to the efficiency of the code. getStopWords is now the only function used to get the stop words anywhere they appear (formerly using get_option directly).
+<<<<<<< HEAD
 * 3.2 ~ Rearranging a lot of the code, user-defined stop words were being ignored.
+=======
+* 3.2 ~ Rearranging a lot of the code, user-defined stop words were being ignored. 
+* 3.3 New version now on GitHub.
+	  ~Version also checked to be compatible with WP 4.3
+>>>>>>> f9891f5b3e5eb99b66b7643e6b0740e0f27d06e1
 
 == Acknowledgements ==
 
