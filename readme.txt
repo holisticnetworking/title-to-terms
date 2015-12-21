@@ -1,6 +1,6 @@
-=== Titles to Tags ===
+=== Title to Terms Ultimate ===
 Contributors: dragonflyeye
-Tags: tags, titles, automation
+Tags: tags, titles, automation, taxonomy
 Requires at least: 3.0
 Tested up to: 4.4
 Stable tag: 3.3

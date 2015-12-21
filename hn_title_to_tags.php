@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Title to Terms Ultimate
-Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
+Plugin URI: http://holisticnetworking.github.io/title-to-tags/
 Description: Creates tags for posts based on the post title on update or publish.
-Version: 3.3
+Version: 4.0
 Author: Thomas J. Belknap
 Author URI: http://holisticnetworking.net
 */
