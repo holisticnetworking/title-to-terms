@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Title to Tags
+Plugin Name: Title to Terms Ultimate
 Plugin URI: http://holisticnetworking.net/plugins/2008/01/25/the-titles-to-tags-plugin/
 Description: Creates tags for posts based on the post title on update or publish.
 Version: 3.3
@@ -32,9 +32,11 @@ class titleToTags {
 	function convert( $post_id ) {
 		$stopwords	= $this->getStopWords();
 		$append	 	= get_option( 't2t_append' );
-		$tpes		= get_option( 't2t_taxonomies' );
+		$types		= get_option( 't2t_taxonomies' );
 		
 		$post		= get_post( wp_is_post_revision( $post_id ) );
+		// Check to see if the post type has title-to-tags settings:
+		$tax		= isset( $types[$post->post_type] ) ? $types[$post->post_type] : 'post_tag';
 		// No title? No point in going any further:
 		if( isset( $post->post_title ) ) :
 			// Setup our tag data:
@@ -42,16 +44,16 @@ class titleToTags {
 			$title_werdz	= explode( ' ', $post->post_title );
 			foreach( $title_werdz as $werd ) :
 				$werd = $this->lowerNoPunc( $werd );
-				if(!in_array( $werd, $stopwords ) && !in_array( $werd, $this->wp_stop ) ) :
+				if( !in_array( $werd, $stopwords ) && !in_array( $werd, $this->wp_stop ) ) :
 					$title_to_tags[] = $werd;
 				endif;
 			endforeach;
-			
+		
 			// Append or complete. Do not replace:
 			if( $append ) :
-				wp_set_post_tags( $post_id, $title_to_tags, true );
+				wp_set_object_terms( $post_id, $title_to_tags, $tax, true );
 			elseif( !wp_get_post_tags( $post_id ) ) :
-				wp_set_post_tags( $post_id, $title_to_tags, true );
+				wp_set_object_terms( $post_id, $title_to_tags, $tax, true );
 			endif;
 		endif;
 	}
@@ -60,19 +62,19 @@ class titleToTags {
 	function addMenu() {
 		add_settings_field(
 			'stop_words',
-			"Title to Tags: ignored words",
+			"Title to Terms: Ignored Words",
 			array( &$this, 'stop_words' ),
 			'writing'
 		);
 		add_settings_field(
 			't2t_append',
-			"Title to Tags: append tags",
+			"Title to Terms: Append Tags",
 			array( &$this, 'append' ),
 			'writing'
 		);
 		add_settings_field(
 			't2t_taxonomies',
-			"Title to Tags: Taxonomies and Post Types",
+			"Title to Terms: Taxonomies and Post Types",
 			array( &$this, 'taxonomies' ),
 			'writing'
 		);
@@ -87,7 +89,7 @@ class titleToTags {
 			$values	= implode( ',', $this->getStopWords() );
 		endif;
 		echo '
-		<p>These words will be ignored by Title to Tags (punctuation removed). <em>To reset, simply delete all values here and the default list will be restored.</em></p>
+		<p>These words will be ignored by Title to Terms (punctuation removed). <em>To reset, simply delete all values here and the default list will be restored.</em></p>
 		<textarea rows="6" cols="100" name="stop_words" id="stop_words">' . $values . '</textarea>
 		';
 	}
@@ -96,7 +98,7 @@ class titleToTags {
 		$value		= get_option( 't2t_append' );
 		$checked	= ( $value ) ? 'checked="checked"' : '';
 		echo '<p>Choose whether to add tags to untagged content, or to append new Title 2 Tags, even if there are tags already present.</p>
-		<input type="checkbox" name="t2t_append" id="t2t_append" ' . $checked . ' /> append Title to Tags to preexisting tags.';
+		<input type="checkbox" name="t2t_append" id="t2t_append" ' . $checked . ' /> append Title to Terms to preexisting tags.';
 	}
 	
 	function taxonomies() {
