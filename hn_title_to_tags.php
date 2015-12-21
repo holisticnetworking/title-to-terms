@@ -32,6 +32,7 @@ class titleToTags {
 	function convert( $post_id ) {
 		$stopwords	= $this->getStopWords();
 		$append	 	= get_option( 't2t_append' );
+		$tpes		= get_option( 't2t_taxonomies' );
 		
 		$post		= get_post( wp_is_post_revision( $post_id ) );
 		// No title? No point in going any further:
@@ -101,7 +102,7 @@ class titleToTags {
 	function taxonomies() {
 		$types		= get_post_types( null, 'objects' );
 		$settings	= get_option( 't2t_taxonomies' );
-		// print_r( $settings );
+		print_r( $settings );
 		echo '<style type="text/css">
 			fieldset.t2t_cpt {
 				margin: 20px;
@@ -114,16 +115,24 @@ class titleToTags {
 				echo '<fieldset class="t2t_cpt"><legend>' . $type->labels->name . '</legend>';
 				$taxes	= get_object_taxonomies( $type->name, 'objects' );
 				if( !empty( $taxes ) ) :
+					$none	= empty( $settings[$type->name] ) ? 'checked="checked"' : '';
+					echo sprintf(
+						'<input %s type="radio" value="" id="%s-none" name="t2t_taxonomies[%s]"><label for="%s-none">none</label><br />',
+						$none,
+						$type->name,
+						$type->name,
+						$type->name
+					);
 					foreach( $taxes as $tax ) :
 						if( !in_array( $tax->name, array( 'post_format' ) ) ) :	
-							$checked	= empty( $settings[$type->name][$tax->name] ) ? '' : 'checked="checked"';
+							$checked	= $settings[$type->name] == $tax->name ? 'checked="checked"' : '';
 							echo sprintf(
-								'<input %s type="checkbox" id="%s-%s" name="t2t_taxonomies[%s][%s]"><label for="%s-%s">%s</label><br />',
+								'<input %s type="radio" value="%s" id="%s-%s" name="t2t_taxonomies[%s]"><label for="%s-%s">%s</label><br />',
 								$checked,
-								$type->name,
 								$tax->name,
 								$type->name,
 								$tax->name,
+								$type->name,
 								$type->name,
 								$tax->name,
 								$tax->labels->name
