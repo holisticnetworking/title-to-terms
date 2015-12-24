@@ -27,6 +27,8 @@ Author URI: http://holisticnetworking.net
 new titleToTags;
 
 class titleToTags {	
+	// List of WP-specific stop words (draft, etc)
+	private $wp_stop	= array('draft', 'auto');
 	
 	// Convert titles to tags on save:
 	function convert( $post_id ) {
@@ -34,28 +36,49 @@ class titleToTags {
 		$append	 	= get_option( 't2t_append' );
 		$types		= get_option( 't2t_taxonomies' );
 		
-		$post		= get_post( wp_is_post_revision( $post_id ) );
+		$post		= get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
 		// Check to see if the post type has title-to-tags settings:
 		$tax		= isset( $types[$post->post_type] ) ? $types[$post->post_type] : 'post_tag';
 		// No title? No point in going any further:
 		if( isset( $post->post_title ) ) :
 			// Setup our tag data:
-			$title_to_tags	= array();
-			$title_werdz	= explode( ' ', $post->post_title );
-			foreach( $title_werdz as $werd ) :
-				$werd = $this->lowerNoPunc( $werd );
-				if( !in_array( $werd, $stopwords ) && !in_array( $werd, $this->wp_stop ) ) :
-					$title_to_tags[] = $werd;
+			$terms			= array();
+			$title_words	= explode( ' ', $post->post_title );
+			foreach( $title_words as $word ) :  
+				$term	= preg_replace('/[^a-z\d]+/i', '', $word );
+				$slug	= $this->lowerNoPunc( $word );
+				if( !in_array( $slug, $stopwords ) && !in_array( $slug, $this->wp_stop ) ) :
+					wp_insert_term(
+						$term,
+						$tax,
+						array(
+							'slug'	=> $slug
+						)
+					);
+					$terms[] = $slug;
 				endif;
 			endforeach;
-		
 			// Append or complete. Do not replace:
 			if( $append ) :
-				wp_set_object_terms( $post_id, $title_to_tags, $tax, true );
-			elseif( !wp_get_post_tags( $post_id ) ) :
-				wp_set_object_terms( $post_id, $title_to_tags, $tax, true );
+				wp_set_object_terms( $post_id, $terms, $tax, true );
+			elseif( !$this->has_terms( $post_id, $tax ) ) :
+				wp_set_object_terms( $post_id, $terms, $tax, true );
 			endif;
 		endif;
+	}
+	
+	function has_terms( $post_id, $tax ) {
+		$terms	= wp_get_post_terms( $post_id, $tax );
+		if( empty( $terms ) ) :
+			return false;
+		elseif( $tax == 'category' ) :
+			$default_cat	= get_option('default_category');
+			if( count( $terms ) == 1 && $terms[0]->term_id == $default_cat ) :
+				wp_set_object_terms( $post_id, array(), $tax );
+				return false;
+			endif;
+		endif;
+		return true;
 	}
 	
 	// Display options page:
@@ -175,12 +198,10 @@ class titleToTags {
 		return $werd;
 	}
 	
-	// List of WP-specific stop words (draft, etc)
-	private $wp_stop	= array('draft', 'auto');
-	
 	// Get out there and rock and roll the bones:
 	function __construct() {
 		add_action( 'save_post', array( &$this, 'convert' ) );
+		// add_action( 'edit_post', array( &$this, 'convert' ) );
 		add_action( 'admin_menu', array( &$this, 'addMenu' ) );
 	}
 }
