@@ -73,8 +73,11 @@ Maybe. It will not handle the process automatically, but if you open any untagge
 * 3.0 ~ Converted to WordPress 3.0-compatible code. Not sure how this will affect the 2.x users out there, but will make a branch in SVN just in case.
 * 3.0.1 ~ Noticed some improvements to be made to the efficiency of the code. getStopWords is now the only function used to get the stop words anywhere they appear (formerly using get_option directly).
 * 3.2 ~ Rearranging a lot of the code, user-defined stop words were being ignored.
-* 3.3 New version now on GitHub.
-	  ~Version also checked to be compatible with WP 4.4
+* 3.3 ~ New version now on GitHub.
+		~ Version also checked to be compatible with WP 4.4
+* 4.0 ~ Changed name to Titles to Terms Ultimate, reflecting newly updated code.
+		~ T2TU now allows one taxonomy per post type to be auto-populated by title-generated terms.
+		~ User-selectable taxonomy for each post type registered to WordPress, and each taxonomy registered to that post type.
 
 ## Acknowledgements
 
