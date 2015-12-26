@@ -29,6 +29,7 @@ new titleToTags;
 class titleToTags {	
 	// List of WP-specific stop words (draft, etc)
 	private $wp_stop	= array('draft', 'auto');
+	private $version	= "4.0";
 	
 	// Convert titles to tags on save:
 	function convert( $post_id ) {
@@ -104,6 +105,7 @@ class titleToTags {
 		register_setting( 'writing', 'stop_words' );
 		register_setting( 'writing', 't2t_append' );
 		register_setting( 'writing', 't2t_taxonomies' );
+		register_setting( 'writing', 't2t_version' );
 	}
 	
 	function stop_words() {
@@ -112,9 +114,14 @@ class titleToTags {
 			$values	= implode( ',', $this->getStopWords() );
 		endif;
 		echo '
-		<p>These words will be ignored by Title to Terms (punctuation removed). <em>To reset, simply delete all values here and the default list will be restored.</em></p>
+		<style type="text/css">.t2t_settings { width: 0; height: 0; }</style>
+		<p><a name="t2t_settings" class="t2t_settings">&nbsp;</a>These words will be ignored by Title to Terms (punctuation removed). <em>To reset, simply delete all values here and the default list will be restored.</em></p>
 		<textarea rows="6" cols="100" name="stop_words" id="stop_words">' . $values . '</textarea>
 		';
+		echo sprintf(
+			'<input type="hidden" name="t2t_version" value="%s" />',
+			$this->version
+		);
 	}
 	
 	function append() {
@@ -127,7 +134,7 @@ class titleToTags {
 	function taxonomies() {
 		$types		= get_post_types( null, 'objects' );
 		$settings	= get_option( 't2t_taxonomies' );
-		print_r( $settings );
+		// print_r( $settings );
 		echo '<style type="text/css">
 			fieldset.t2t_cpt {
 				margin: 20px;
@@ -198,11 +205,22 @@ class titleToTags {
 		return $werd;
 	}
 	
+	// Version update messages:
+	function version_check() {
+		if (get_site_option( 't2t_version' ) != $this->version) {
+			$message	= '<div class="updated">';
+				$message	.= '<p>Thank you for updating to <strong>Titles to Terms Ultimate!</strong> Please check your <a href="options-writing.php#t2t_settings">writing settings</a> to continue.</p>';
+			$message	.= '</div>';
+			echo $message;
+		}
+	}
+	
 	// Get out there and rock and roll the bones:
 	function __construct() {
 		add_action( 'save_post', array( &$this, 'convert' ) );
 		// add_action( 'edit_post', array( &$this, 'convert' ) );
 		add_action( 'admin_menu', array( &$this, 'addMenu' ) );
+		add_action( 'admin_notices', array( &$this, 'version_check' ) );
 	}
 }
 ?>
