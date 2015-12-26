@@ -13,7 +13,13 @@ Keep forgetting to add tags to your posts? Let Title to Tags convert keywords au
 
 NEW REPOSITORY ON [GITHUB!](https://github.com/holisticnetworking/title-to-tags) Please consider making a contribution to good code.
 
-This plugin automatically converts keywords in a post title to tags upon saving.  It includes a user-editable list of words you want the plugin to ignore, which by default includes the more obviously-useless words like "I" or "wasn't."  You can also reset the list back to defaults by deleting the current list.
+The ultimate auto-tagging plugin for WordPress.
+
+Title to Terms Ultimate is for every WordPress admin that needs tags, categories and other taxonomies filled out, but rarely gets what they need. For each post type in your WordPress installation, T2TU will allow you to assign a taxonomy to be automatically updated with keywords pulled from the title of the post.
+
+Every time a post gets saved or updated, T2TU analyzes the title of the post for usable keywords. A list of user-configurable "Stop Words" is checked by the parser, so that words like "I" or "going" don't get made into ultimately useless tags.
+
+T2TU can be configured to either add new tags to a post or append additional tags.
 
 *   Converts keywords in post titles to tags
 *   Includes user-editable list of words to be ignored
@@ -21,22 +27,17 @@ This plugin automatically converts keywords in a post title to tags upon saving.
 *   Converts on save, not publish.
 *   Does not convert if there are already tags assigned.
 
-Multi-blog adminstrators take note: this plugin is especially helpful if you're building a community-based site where tagging is important and your bloggers are not always diligent about tagging.
-
 WP banner photo credit: [Sarah Bresnahan on Flickr](http://www.flickr.com/photos/sjbresnahan/4087585005/sizes/o/in/photolist-7ecWBx-7egQk9-6JvPPE-6JrJbB-8pnP89-6vTRJU-Fv4Vf-bUUTad-6UrYUY-8H8P4N-f7MqAR-6kcugT-ceuhxY-4YCw2W-e1tJ5X-7h6Si1-9SKEiC-6rPyjP-f4y8VP-29Xa3H-6w1QVu-bE8ArQ-bT3mtc-bT3m7p-bE8ANW-5fFT4a-PCDgy-PCDg5-bTdrSp-4stkJX-4sxnZo-8H8Qru-f82DeA-4VaRUY-nw9vn-f7Mv9e-81XHfC-bX7VFg-53weBC-zzoQA-aiZtUG-8kTNpR-68awX8-5mR9EQ-e1JMNH-4V6Co8-6eqCTy-4VaRRY-9Fafo-6KP53J-9Faf6/
 ) (CC licensed)
 
-== Installation ==
-
-Very simple, very easy:
-
-1.  Extract the zip file and upload the title_to_tags folder to your /wp-content/plugins directory.
-2.  Activate plugin by going to the Plugins section of your Control Panel.
-3.  Configure the plugin by going to Settings -> Writing in your Control Panel.
+== Download and Installation ==
+* Download the plugin from the WordPress repository, [here](https://wordpress.org/plugins/title-to-tags/ "Titles to Tags").
+* Unzip and upload the file to your /wp-content/plugins directory.
+* In the Dashboard, go to Plugins->All Plugins and activate.
+* Configure T2TU from the Settings->Writing screen
 
 == Frequently Asked Questions ==
 
-=======
 = How Can I Contribute? =
 The plugin is now being maintained on GitHub, so please do contribute all your questions, comments, suggestions, fixes and improvements with me [here](https://github.com/holisticnetworking/title-to-tags).
 
@@ -59,11 +60,6 @@ Yes. Simply delete the current list of stop words, and Title to Tags will replac
 = Will this plugin put tags on my old posts? =
 
 Maybe. It will not handle the process automatically, but if you open any untagged post and save it, Titles to Tags will work.
-
-= Does this plugin work with versions less than 3.1? =
-
-The most recent release of this plugin was designed to handle 3.0 and above. It has not been tested below 3.0, however, there is a branched version in SVN that will work with versions greater than 2.7:
-http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
 
 == Screenshots ==
 
