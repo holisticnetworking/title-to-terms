@@ -1,7 +1,7 @@
 # Title to Terms Ultimate
 The ultimate auto-tagging plugin for WordPress.
 
-Title to Terms Ultimate is for every WordPress admin that needs tags, categories and other taxonomies filled out, but rarely gets what they need. For each post type in your WordPress installation, T2TU will allow you to assign a taxonomy to be automatically updated with keywords pulled from the title of the post.
+Title to Terms Ultimate is for every WordPress admin that needs tags, categories and other taxonomies filled out automatically. For each post type in your WordPress installation, T2TU will allow you to assign a taxonomy to be automatically updated with keywords pulled from the title of the post.
 
 Every time a post gets saved or updated, T2TU analyzes the title of the post for usable keywords. A list of user-configurable "Stop Words" is checked by the parser, so that words like "I" or "going" don't get made into ultimately useless tags.
 
