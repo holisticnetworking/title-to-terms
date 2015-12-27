@@ -27,9 +27,6 @@ T2TU can be configured to either add new tags to a post or append additional tag
 *   Converts on save, not publish.
 *   Does not convert if there are already tags assigned.
 
-WP banner photo credit: [Sarah Bresnahan on Flickr](http://www.flickr.com/photos/sjbresnahan/4087585005/sizes/o/in/photolist-7ecWBx-7egQk9-6JvPPE-6JrJbB-8pnP89-6vTRJU-Fv4Vf-bUUTad-6UrYUY-8H8P4N-f7MqAR-6kcugT-ceuhxY-4YCw2W-e1tJ5X-7h6Si1-9SKEiC-6rPyjP-f4y8VP-29Xa3H-6w1QVu-bE8ArQ-bT3mtc-bT3m7p-bE8ANW-5fFT4a-PCDgy-PCDg5-bTdrSp-4stkJX-4sxnZo-8H8Qru-f82DeA-4VaRUY-nw9vn-f7Mv9e-81XHfC-bX7VFg-53weBC-zzoQA-aiZtUG-8kTNpR-68awX8-5mR9EQ-e1JMNH-4V6Co8-6eqCTy-4VaRRY-9Fafo-6KP53J-9Faf6/
-) (CC licensed)
-
 == Download and Installation ==
 * Download the plugin from the WordPress repository, [here](https://wordpress.org/plugins/title-to-tags/ "Titles to Tags").
 * Unzip and upload the file to your /wp-content/plugins directory.
@@ -94,3 +91,4 @@ Maybe. It will not handle the process automatically, but if you open any untagge
 == Acknowledgements ==
 
 * This plugin would not have been nearly as cool without the stop words list.  That list was originally from Adam Whippy's awesome plugin, [Clean Trunks] (http://www.york-newyork.com/seo-plugin-wordpress-urls/ "Automated SEO Friendly URL plugin for Wordpress")
+* The WP Plugin Repository icon and banner were both made with the kind contribution of: [Muharrem Fevzi Çelik @ The Noun Project](https://thenounproject.com/search/?q=taxonomy&i=165760) (CC licensed)
