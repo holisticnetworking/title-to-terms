@@ -28,4 +28,4 @@ before_script:
   - bash wp-tests/bin/install-wp-tests.sh test root '' localhost $WP_VERSION
 
 script:
-  - cd spec && bundle exec rspec test.rb
+  - cd wp-tests/spec && bundle exec rspec test.rb
