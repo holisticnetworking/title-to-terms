@@ -31,6 +31,6 @@ script:
   - cd wp-tests/spec && bundle exec rspec test.rb
   
 notifications:
-  slack: hnets:yQhHE3xyDqgdxYqW9zQ2701R
+  slack: 'hnets:yQhHE3xyDqgdxYqW9zQ2701R'
     on_failure: always
     on_success: change
