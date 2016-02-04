@@ -79,6 +79,7 @@ script:
   - $WP_DEVELOP_DIR/php-codesniffer/scripts/phpcs -p -s -v -n . --standard=./codesniffer.ruleset.xml --extensions=php
 
 notifications:
+  email: false
   slack: 
     rooms: 
         - hnets:yQhHE3xyDqgdxYqW9zQ2701R#development
