@@ -35,7 +35,7 @@ before_script:
   - git clone --depth=1 --branch="$WP_VERSION" https://github.com/WordPress/WordPress.git $WP_DEVELOP_DIR
   # Set up theme information.
   - plug_slug=$(basename $(pwd))
-  - plug_dir=$WP_DEVELOP_DIR/src/wp-content/plugins/$plug_slug
+  - plug_dir=$WP_DEVELOP_DIR/wp-content/plugins/$plug_slug
   - cd ..
   - mv $plug_slug $plug_dir
   # Set up WordPress configuration.
