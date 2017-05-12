@@ -70,19 +70,19 @@ class TitleToTerms
         add_settings_field(
             'stopWords',
             "Title to Terms: Ignored Words",
-            array( &$this, 'stopWords' ),
+            [&$this, 'stopWords'],
             'writing'
         );
         add_settings_field(
             't2t_append',
             "Title to Terms: Append Tags",
-            array( &$this, 'append' ),
+            [&$this, 'append'],
             'writing'
         );
         add_settings_field(
             't2t_taxonomies',
             "Title to Terms: Taxonomies and Post Types",
-            array( &$this, 'taxonomies' ),
+            [&$this, 'taxonomies'],
             'writing'
         );
         register_setting('writing', 'stopWords');
@@ -110,7 +110,7 @@ class TitleToTerms
         );
     }
     
-    private function append()
+    public function append()
     {
         $value      = get_option('t2t_append');
         $checked    = ( $value ) ? 'checked="checked"' : '';
@@ -120,7 +120,7 @@ class TitleToTerms
 		    preexisting tags.';
     }
     
-    private function taxonomies()
+    public function taxonomies()
     {
         $types      = get_post_types(null, 'objects');
         $settings   = get_option('t2t_taxonomies');
@@ -203,20 +203,17 @@ class TitleToTerms
     public function versionCheck()
     {
         if (get_site_option('t2t_version') != $this->version) {
-            $message    = '<div class="updated">';
-                $message    .= '<p>Thank you for updating to <strong>Titles to Terms Ultimate!</strong> Please check 
-                    your <a href="options-writing.php#t2t_settings">writing settings</a> to continue.</p>';
-            $message    .= '</div>';
-            echo $message;
+            include plugin_dir_path( __FILE__ ) . 'lib/fragments/update.php';
+            update_site_option('t2t_version', $this->version);
         }
     }
     
     // Get out there and rock and roll the bones:
     public function __construct()
     {
-        add_action('save_post', array( &$this, 'convert' ));
-        // add_action( 'edit_post', array( &$this, 'convert' ) );
-        add_action('admin_menu', array( &$this, 'addMenu' ));
-        add_action('admin_notices', array( &$this, 'versionCheck' ));
+        add_action('save_post', [&$this, 'convert']);
+        // add_action( 'edit_post', [&$this, 'convert']);
+        add_action('admin_menu', [&$this, 'addMenu']);
+        add_action('admin_notices', [&$this, 'versionCheck']);
     }
 }
