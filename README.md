@@ -80,6 +80,4 @@ Maybe. It will not handle the process automatically, but if you open any untagge
 		~ User-selectable taxonomy for each post type registered to WordPress, and each taxonomy registered to that post type.
 
 ## Acknowledgements
-
-* This plugin would not have been nearly as cool without the stop words list.  That list was originally from Adam Whippy's awesome plugin, [Clean Trunks](http://www.york-newyork.com/seo-plugin-wordpress-urls/ "Automated SEO Friendly URL plugin for Wordpress").
 * The WP Plugin Repository icon and banner were both made with the kind contribution of: [Muharrem Fevzi Çelik @ The Noun Project](https://thenounproject.com/search/?q=taxonomy&i=165760) (CC licensed)
