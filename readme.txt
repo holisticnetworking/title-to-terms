@@ -1,52 +1,56 @@
-=== Titles to Tags ===
+=== Title to Terms Ultimate ===
+
 Contributors: dragonflyeye
-Tags: tags, titles, automation
+Tags: automation, automate, automatic, taxonomy, category, categories, tag, tags, admin, analytics, posts, pages, custom post type, cpt
 Requires at least: 3.0
 Tested up to: 4.4
-Stable tag: 3.3
+Stable tag: 4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin automatically converts keywords in a post title to tags, while ignoring a user-editable list of words.
+
+
+Automatically add tags, categories and more to your posts, pages and custom post types.
 
 == Description ==
+The ultimate auto-tagging plugin for WordPress.
 
-NEW REPOSITORY ON [GITHUB!](https://github.com/holisticnetworking/title-to-tags) Please consider making a contribution to good code.
+Title to Terms Ultimate is for every WordPress admin that needs tags, categories and other taxonomies filled out automatically. For each post type in your WordPress installation, T2TU will allow you to assign a taxonomy to be automatically updated with keywords pulled from the title of the post.
 
-This plugin automatically converts keywords in a post title to tags upon saving.  It includes a user-editable list of words you want the plugin to ignore, which by default includes the more obviously-useless words like "I" or "wasn't."  You can also reset the list back to defaults by deleting the current list.
+Every time a post gets saved or updated, T2TU analyzes the title of the post for usable keywords. A list of user-configurable "Stop Words" is checked by the parser, so that words like "I" or "going" don't get made into ultimately useless tags.
 
-*   Converts keywords in post titles to tags
-*   Includes user-editable list of words to be ignored
-*   Ignore list can be reset to default at any time
+*   Converts keywords in post titles to terms in any taxonomy
+*   Includes user-editable list of words to be ignored.
+*   Ignore list can be reset to default at any time.
 *   Converts on save, not publish.
-*   Does not convert if there are already tags assigned.
+*   Configurable to either add new terms or append the list of terms.
 
-Multi-blog adminstrators take note: this plugin is especially helpful if you're building a community-based site where tagging is important and your bloggers are not always diligent about tagging.
+Multisite admins take note: this plugin is especially helpful if you're building a community-based site where tagging is important and your bloggers are not always diligent about tagging.
 
 WP banner photo credit: [Sarah Bresnahan on Flickr](http://www.flickr.com/photos/sjbresnahan/4087585005/sizes/o/in/photolist-7ecWBx-7egQk9-6JvPPE-6JrJbB-8pnP89-6vTRJU-Fv4Vf-bUUTad-6UrYUY-8H8P4N-f7MqAR-6kcugT-ceuhxY-4YCw2W-e1tJ5X-7h6Si1-9SKEiC-6rPyjP-f4y8VP-29Xa3H-6w1QVu-bE8ArQ-bT3mtc-bT3m7p-bE8ANW-5fFT4a-PCDgy-PCDg5-bTdrSp-4stkJX-4sxnZo-8H8Qru-f82DeA-4VaRUY-nw9vn-f7Mv9e-81XHfC-bX7VFg-53weBC-zzoQA-aiZtUG-8kTNpR-68awX8-5mR9EQ-e1JMNH-4V6Co8-6eqCTy-4VaRRY-9Fafo-6KP53J-9Faf6/
+
 ) (CC licensed)
 
 == Installation ==
-
 Very simple, very easy:
-
 1.  Extract the zip file and upload the title_to_tags folder to your /wp-content/plugins directory.
 2.  Activate plugin by going to the Plugins section of your Control Panel.
 3.  Configure the plugin by going to Settings -> Writing in your Control Panel.
 
 == Frequently Asked Questions ==
-
-=======
 = How Can I Contribute? =
-The plugin is now being maintained on GitHub, so please do contribute all your questions, comments, suggestions, fixes and improvements with me [here](https://github.com/holisticnetworking/title-to-tags).
+
+The plugin is now being maintained on GitHub, so please do contribute all your questions, comments, suggestions, fixes and improvements with me [here](https://github.com/holisticnetworking/title-to-terms).
 
 = Does this plugin convert all words in the title? =
 
 No.  There is a user-configurable list of stop words, pre-populated with a host of common words, which can be used to fine-tune the resulting tags.
 
-= Will this plugin overwrite my existing tags? =
+= Will this plugin overwrite my existing tags? = 
 
-No.  The plugin checks for the existence of tags, and if there are none, writes them based on the title.
+No. The plugin can be configured to either
+* Add new terms only when the post does not already contain terms in that taxonomy
+* Append the list of terms with any new terms not already added.
 
 = When are the tags added?  At publish or save? =
 
@@ -60,18 +64,12 @@ Yes. Simply delete the current list of stop words, and Title to Tags will replac
 
 Maybe. It will not handle the process automatically, but if you open any untagged post and save it, Titles to Tags will work.
 
-= Does this plugin work with versions less than 3.1? =
-
-The most recent release of this plugin was designed to handle 3.0 and above. It has not been tested below 3.0, however, there is a branched version in SVN that will work with versions greater than 2.7:
-http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
-
 == Screenshots ==
 
 1. The Plugins page showing the Title to Tags plugin pre-activation.
 2. The Title to Tags settings on the Writing page.
 
 == Version History ==
-
 * 1.0 ~ Initial public release
 * 1.1 ~ Corrected some meta data
 * 1.2 ~ Name collision with another plugin, FeedWordPress, corrected
@@ -91,7 +89,10 @@ http://plugins.svn.wordpress.org/title-to-tags/branches/2.1/trunk/
 * 3.2 ~ Rearranging a lot of the code, user-defined stop words were being ignored.
 * 3.3 New version now on GitHub.
 	  ~Version also checked to be compatible with WP 4.4
+* 4.0 ~ Changed name to Titles to Terms Ultimate, reflecting newly updated code.
+	~ T2TU now allows one taxonomy per post type to be auto-populated by title-generated terms.
+	~ User-selectable taxonomy for each post type registered to WordPress, and each taxonomy registered to that post type.
 
 == Acknowledgements ==
 
-* This plugin would not have been nearly as cool without the stop words list.  That list was originally from Adam Whippy's awesome plugin, [Clean Trunks] (http://www.york-newyork.com/seo-plugin-wordpress-urls/ "Automated SEO Friendly URL plugin for Wordpress")
+* The WP Plugin Repository icon and banner were both made with the kind contribution of: [Muharrem Fevzi Çelik @ The Noun Project](https://thenounproject.com/search/?q=taxonomy&i=165760) (CC licensed)
