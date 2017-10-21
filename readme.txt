@@ -8,9 +8,7 @@ Stable tag: 4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-
-
-Automatically add tags, categories and more to your posts, pages and custom post types.
+The ultimate auto-tagging plugin for WordPress. 
 
 == Description ==
 The ultimate auto-tagging plugin for WordPress.
