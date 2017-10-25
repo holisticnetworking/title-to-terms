@@ -1,6 +1,13 @@
 <?php
 /**
- * the Title To Tags main class.
+ * The Title To Tags main class.
+ * PHP Version >5.6
+ *
+ * @category WordPress_Plugin
+ * @package  TitleToTerms
+ * @author   Thomas J Belknap <tbelknap@holisticnetworking.net>
+ * @license  GPL2.0
+ * @link     http://holisticnetworking.net/
  */
 namespace TitleToTerms;
 
@@ -203,7 +210,7 @@ class TitleToTerms
     public function versionCheck()
     {
         if (get_site_option('t2t_version') != $this->version) {
-            include plugin_dir_path( __FILE__ ) . 'lib/fragments/update.php';
+            include plugin_dir_path(__FILE__) . 'lib/fragments/update.php';
             update_site_option('t2t_version', $this->version);
         }
     }
@@ -212,7 +219,6 @@ class TitleToTerms
     public function __construct()
     {
         add_action('save_post', [&$this, 'convert']);
-        // add_action( 'edit_post', [&$this, 'convert']);
         add_action('admin_menu', [&$this, 'addMenu']);
         add_action('admin_notices', [&$this, 'versionCheck']);
     }

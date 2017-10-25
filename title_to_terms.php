@@ -1,11 +1,11 @@
 <?php
-/*
-Plugin Name: Title to Terms Ultimate
-Plugin URI: http://holisticnetworking.github.io/title-to-tags/
-Description: Creates tags for posts based on the post title on update or publish.
-Version: 4.0
-Author: Thomas J. Belknap
-Author URI: http://holisticnetworking.net
+/**
+ * Plugin Name: Title to Terms Ultimate
+ * Plugin URI: http://holisticnetworking.github.io/title-to-tags/
+ * Description: Creates tags for posts based on the post title on update or publish.
+ * Version: 4.0
+ * Author: Thomas J. Belknap
+ * Author URI: http://holisticnetworking.net
 */
 
 /*  Copyright 2013  Thomas J Belknap  (email : tbelknap@holisticnetworking.net)
@@ -25,6 +25,6 @@ Author URI: http://holisticnetworking.net
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 namespace TitleToTerms;
-require_once plugin_dir_path( __FILE__ ) . 'lib/title-to-terms.class.php';
+require_once plugin_dir_path(__FILE__) . 'lib/title-to-terms.class.php';
 
 new TitleToTerms;
