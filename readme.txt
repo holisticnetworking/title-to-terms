@@ -3,7 +3,7 @@
 Contributors: dragonflyeye
 Tags: automation, automate, automatic, taxonomy, category, categories, tag, tags, admin, analytics, posts, pages, custom post type, cpt
 Requires at least: 3.0
-Tested up to: 4.4
+Tested up to: 4.9
 Stable tag: 4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html

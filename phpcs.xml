@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ruleset name="Title to Terms" namespace="TitleToTerms">
+    <description>Coding standards for Title To Terms Ultimate</description>
+
+    <file>./title-to-terms.php</file>
+    <file>./Library/class-core.php</file>
+
+    <!-- Use the WordPress Core standard -->
+    <rule ref="WordPress-Core">
+        <exclude name="WordPress.WP.I18n.MissingTranslatorsComment"/>
+    </rule>
+</ruleset>
