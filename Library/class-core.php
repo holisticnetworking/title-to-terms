@@ -177,7 +177,7 @@ class Core {
 		$vals = get_option( 'stop_words' );
 		// Otherwise, grab the default list:
 		if ( empty( $vals ) ) :
-			$file = dirname( __FILE__ ) . '/stop_words.txt';
+			$file = dirname( __FILE__ ) . '/stopwords.txt';
 			$vals = file_get_contents( $file );
 		endif;
 
@@ -206,7 +206,6 @@ class Core {
 
 		// Get out there and rock and roll the bones:
 	public function __construct() {
-		error_log( 'dude. yo' );
 		add_action( 'save_post', [ &$this, 'convert' ] );
 		add_action( 'admin_menu', [ &$this, 'add_menu' ] );
 		add_action( 'admin_notices', [ &$this, 'version_check' ] );
