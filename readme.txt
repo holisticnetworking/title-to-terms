@@ -1,17 +1,20 @@
 === Title to Terms Ultimate ===
 
 Contributors: dragonflyeye
-Tags: automation, automate, automatic, taxonomy, category, categories, tag, tags, admin, analytics, posts, pages, custom post type, cpt
+Tags: automation, automate, automatic, taxonomy, categories, tags
 Requires at least: 3.0
 Tested up to: 4.9
+Requires PHP: 5.2.4
 Stable tag: 4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The ultimate auto-tagging plugin for WordPress. 
+The ultimate auto-tagging plugin for WordPress.
 
 == Description ==
 The ultimate auto-tagging plugin for WordPress.
+
+__NOTE__: The plugin is now being maintained on GitHub, so please do contribute all your questions, comments, suggestions, fixes and improvements with me [here](https://github.com/holisticnetworking/title-to-terms).
 
 Title to Terms Ultimate is for every WordPress admin that needs tags, categories and other taxonomies filled out automatically. For each post type in your WordPress installation, T2TU will allow you to assign a taxonomy to be automatically updated with keywords pulled from the title of the post.
 
@@ -26,12 +29,17 @@ Every time a post gets saved or updated, T2TU analyzes the title of the post for
 Multisite admins take note: this plugin is especially helpful if you're building a community-based site where tagging is important and your bloggers are not always diligent about tagging.
 
 == Installation ==
-Very simple, very easy:
 1.  Extract the zip file and upload the title_to_tags folder to your /wp-content/plugins directory.
 2.  Activate plugin by going to the Plugins section of your Control Panel.
-3.  Configure the plugin by going to Settings -> Writing in your Control Panel.
+3.  Configure the plugin by going to Settings -> Writing in your Control Panel:
+
+* __Ignored Words__: By default, words with weak SEO meanings are skipped. This is the list of those terms, which can be edited to add or remove words as necessary for your application.
+* __Append Tags__: By default, T2TU only adds terms to posts without preexisting terms. Checking this box allows T2TU to append that list.
+* __Taxonomies and Post Types__: For each post type, set the taxonomy for which you want to automatically add terms.
+
 
 == Frequently Asked Questions ==
+
 = How Can I Contribute? =
 
 The plugin is now being maintained on GitHub, so please do contribute all your questions, comments, suggestions, fixes and improvements with me [here](https://github.com/holisticnetworking/title-to-terms).
@@ -40,7 +48,7 @@ The plugin is now being maintained on GitHub, so please do contribute all your q
 
 No.  There is a user-configurable list of stop words, pre-populated with a host of common words, which can be used to fine-tune the resulting tags.
 
-= Will this plugin overwrite my existing tags? = 
+= Will this plugin overwrite my existing tags? =
 
 No. The plugin can be configured to either
 * Add new terms only when the post does not already contain terms in that taxonomy
@@ -63,7 +71,7 @@ Maybe. It will not handle the process automatically, but if you open any untagge
 1. The Plugins page showing the Title to Tags plugin pre-activation.
 2. The Title to Tags settings on the Writing page.
 
-== Version History ==
+== Changelog ==
 * 1.0 ~ Initial public release
 * 1.1 ~ Corrected some meta data
 * 1.2 ~ Name collision with another plugin, FeedWordPress, corrected
@@ -86,6 +94,11 @@ Maybe. It will not handle the process automatically, but if you open any untagge
 * 4.0 ~ Changed name to Titles to Terms Ultimate, reflecting newly updated code.
 	~ T2TU now allows one taxonomy per post type to be auto-populated by title-generated terms.
 	~ User-selectable taxonomy for each post type registered to WordPress, and each taxonomy registered to that post type.
+
+== Upgrade Notice ==
+
+= 4.0 =
+Significant improvements to the flexibility of this plugin, which can now be used on any public post type and taxonomy.
 
 == Acknowledgements ==
 
