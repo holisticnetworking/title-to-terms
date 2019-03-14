@@ -33,6 +33,7 @@ class Core {
 			foreach ( $title_words as $word ) :
 				$term = preg_replace( '/[^a-z\d]+/i', '', $word );
 				$slug = $this->lower_no_punc( $word );
+				if(!is_numeric($slug) && strlen($slug) >= 4){
 				if ( ! in_array( $slug, $stop_words ) && ! in_array( $slug, $this->wp_stop ) ) :
 					wp_insert_term(
 						$term,
@@ -43,6 +44,7 @@ class Core {
 					);
 					$terms[] = $slug;
 				endif;
+				}
 			endforeach;
 			// Append or complete. Do not replace:
 			if ( $append ) :
