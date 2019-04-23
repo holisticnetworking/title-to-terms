@@ -31,7 +31,8 @@ class Core {
 			$terms       = array();
 			$title_words = explode( ' ', $post->post_title );
 			foreach ( $title_words as $word ) :
-				$term = preg_replace( '/[^a-z\d]+/i', '', $word );
+				// $term = preg_replace( '/[^a-z\d]+/i', '', $word );
+				$term = sanitize_text_field( $word );
 				$slug = $this->lower_no_punc( $word );
 				if ( ! in_array( $slug, $stop_words ) && ! in_array( $slug, $this->wp_stop ) ) :
 					wp_insert_term(
