@@ -42,21 +42,21 @@ class Core {
 		$post = get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
 		// If we have a record for this post type and if the post has a title, it's go time:
 		if ( $this->is_type( $post->post_type ) && isset( $post->post_title ) ) {
-			error_log( 'awe, yeah.' );
-			$tax         = $this->get_type( $post->post_type );
+			$tax         = $this->get_type_taxonomy( $post->post_type );
 			$terms       = array();
 			$title_words = explode( ' ', $post->post_title );
 			foreach ( $title_words as $word ) {
 				$term = sanitize_text_field( $word );
 				$slug = $this->lower_no_punc( $word );
 				if ( ! $this->is_stop_word( $slug ) && ! $this->is_ignored_status( $slug ) ) {
-					wp_insert_term(
+					$new_term = wp_insert_term(
 						$term,
 						$tax,
 						array(
 							'slug' => $slug,
 						)
 					);
+					error_log(print_r($new_term, true));
 					$terms[] = $slug;
 				}
 			}
@@ -66,6 +66,8 @@ class Core {
 			} elseif ( ! $this->has_terms( $post_id, $tax ) ) {
 				wp_set_object_terms( $post_id, $terms, $tax, true );
 			}
+		} else {
+			error_log($post->post_type . ': ' . $post->post_title);
 		}
 	}
 
@@ -206,7 +208,6 @@ class Core {
 	 * @return array
 	 */
 	public function is_ignored_taxonomy( $tax ) {
-		error_log( $tax );
 		return in_array( $tax, $this->ignored_taxonomies );
 	}
 
@@ -240,7 +241,7 @@ class Core {
 	}
 
 	public function is_stop_word( $word ) {
-		return in_array( $this->stop_words, $word );
+		return in_array( $word, $this->stop_words );
 	}
 
 	/**
@@ -264,6 +265,10 @@ class Core {
 		return $this->types;
 	}
 
+	public function get_type_taxonomy( $type ) {
+		return $this->types[ $type ];
+	}
+
 	/**
 	 * @param array $types
 	 */
@@ -275,7 +280,7 @@ class Core {
 	 * @return boolean
 	 */
 	public function is_type( $post_type ) {
-		return in_array( $post_type, $this->types );
+		return key_exists( $post_type, $this->types );
 	}
 
 	/**
