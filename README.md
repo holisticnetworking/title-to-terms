@@ -78,6 +78,8 @@ Maybe. It will not handle the process automatically, but if you open any untagge
 * 4.0 ~ Changed name to Titles to Terms Ultimate, reflecting newly updated code.
 		~ T2TU now allows one taxonomy per post type to be auto-populated by title-generated terms.
 		~ User-selectable taxonomy for each post type registered to WordPress, and each taxonomy registered to that post type.
+* 4.1 ~ Refactoring code for efficiency and caching. Also:
+        ~ Creating option to either maintain possessive apostrophes or not.
 
 ## Acknowledgements
 * The WP Plugin Repository icon and banner were both made with the kind contribution of: [Muharrem Fevzi Çelik @ The Noun Project](https://thenounproject.com/search/?q=taxonomy&i=165760) (CC licensed)

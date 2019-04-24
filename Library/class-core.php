@@ -9,32 +9,44 @@
  * @license  GPL2.0
  * @link     http://holisticnetworking.net/
  */
+
 namespace Title_To_Terms;
 
 class Core {
 
 	// List of WP-specific stop words (draft, etc)
-	private $wp_stop = array( 'draft', 'auto' );
-	private $version = '4.0';
+	private $ignored_statuses = array( 'draft', 'auto' );
 
-		// Convert titles to tags on save:
-	public function convert( $post_id ) {
-		$stop_words = $this->get_stop_words();
-		$append     = get_option( 't2t_append' );
-		$types      = get_option( 't2t_taxonomies' );
-		$post       = get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
-		// Check to see if the post type has title-to-tags settings:
-		$tax = isset( $types[ $post->post_type ] ) ? $types[ $post->post_type ] : 'post_tag';
-		// No title? No point in going any further:
-		if ( isset( $post->post_title ) ) :
-			// Setup our tag data:
+	private $version = '4.1';
+	protected $stop_words = array();
+	protected $append = false;
+	protected $types = array();
+
+	// Get out there and rock and roll the bones:
+	public function __construct() {
+		$this->set_stop_words();
+		$this->set_append_tags();
+		$this->set_types();
+		add_action( 'save_post', [ &$this, 'convert_post_title' ] );
+		add_action( 'admin_menu', [ &$this, 'add_menu' ] );
+		add_action( 'admin_notices', [ &$this, 'check_version' ] );
+	}
+
+	// Convert titles to tags on save:
+	public function convert_post_title( $post_id ) {
+		error_log('dude. totally.');
+		$post = get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
+		// If we have a record for this post type and if the post has a title, it's go time:
+		if ( $this->is_type( $post->post_type ) && isset( $post->post_title ) ) :
+			error_log('awe, yeah.');
+			$tax         = $this->get_type( $post->post_type );
 			$terms       = array();
 			$title_words = explode( ' ', $post->post_title );
 			foreach ( $title_words as $word ) :
 				// $term = preg_replace( '/[^a-z\d]+/i', '', $word );
 				$term = sanitize_text_field( $word );
 				$slug = $this->lower_no_punc( $word );
-				if ( ! in_array( $slug, $stop_words ) && ! in_array( $slug, $this->wp_stop ) ) :
+				if ( ! $this->is_stop_word( $slug ) && ! $this->is_ignored_status( $slug ) ) :
 					wp_insert_term(
 						$term,
 						$tax,
@@ -46,7 +58,7 @@ class Core {
 				endif;
 			endforeach;
 			// Append or complete. Do not replace:
-			if ( $append ) :
+			if ( $this->append_tags() ) :
 				wp_set_object_terms( $post_id, $terms, $tax, true );
 			elseif ( ! $this->has_terms( $post_id, $tax ) ) :
 				wp_set_object_terms( $post_id, $terms, $tax, true );
@@ -62,30 +74,32 @@ class Core {
 			$default_cat = get_option( 'default_category' );
 			if ( count( $terms ) == 1 && $terms[0]->term_id == $default_cat ) :
 				wp_set_object_terms( $post_id, array(), $tax );
+
 				return false;
 			endif;
 		endif;
+
 		return true;
 	}
 
-		// Display options page:
+	// Display options page:
 	public function add_menu() {
 		add_settings_field(
 			'stop_words',
 			'Title to Terms: Ignored Words',
-			[ &$this, 'stop_words' ],
+			[ &$this, 'settings_stop_words' ],
 			'writing'
 		);
 		add_settings_field(
 			't2t_append',
 			'Title to Terms: Append Tags',
-			[ &$this, 'append' ],
+			[ &$this, 'settings_append' ],
 			'writing'
 		);
 		add_settings_field(
 			't2t_taxonomies',
 			'Title to Terms: Taxonomies and Post Types',
-			[ &$this, 'taxonomies' ],
+			[ &$this, 'settings_taxonomies' ],
 			'writing'
 		);
 		register_setting( 'writing', 'stop_words' );
@@ -94,7 +108,7 @@ class Core {
 		register_setting( 'writing', 't2t_version' );
 	}
 
-	public function stop_words() {
+	public function settings_stop_words() {
 		$values = get_option( 'stop_words' );
 		if ( empty( $values ) ) :
 			$values = implode( ',', $this->get_stop_words() );
@@ -112,7 +126,7 @@ class Core {
 		);
 	}
 
-	public function append() {
+	public function settings_append() {
 		$value   = get_option( 't2t_append' );
 		$checked = ( $value ) ? 'checked="checked"' : '';
 		echo '<p>Choose whether to add tags to untagged content, or to append new Title 2 Tags, even if there are tags 
@@ -121,7 +135,7 @@ class Core {
 		    preexisting tags.';
 	}
 
-	public function taxonomies() {
+	public function settings_taxonomies() {
 		$types    = get_post_types( null, 'objects' );
 		$settings = get_option( 't2t_taxonomies' );
 		// print_r( $settings );
@@ -171,8 +185,39 @@ class Core {
 		endforeach;
 	}
 
-		// Gets the stop word list:
-	private function get_stop_words() {
+	// Converts all words into lower-case words, sans punctuation or possessives.
+	private function lower_no_punc( $werd ) {
+		$werd = strtolower( trim( preg_replace( '#[^\p{L}\p{N}]+#u', '', $werd ) ) );
+
+		return $werd;
+	}
+
+	// Version update messages:
+	public function check_version() {
+		if ( get_site_option( 't2t_version' ) != $this->version ) {
+			include plugin_dir_path( __FILE__ ) . '/fragments/update.php';
+			update_site_option( 't2t_version', $this->version );
+		}
+	}
+
+	/**
+	 * @return array
+	 */
+	public function is_ignored_status( $status ) {
+		return in_array( $this->ignored_statuses, $status );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function get_stop_words() {
+		return $this->stop_words;
+	}
+
+	/**
+	 *
+	 */
+	public function set_stop_words() {
 		$stop_words = array();
 		// Try the current options first:
 		$vals = get_option( 'stop_words' );
@@ -182,33 +227,58 @@ class Core {
 			$vals = file_get_contents( $file );
 		endif;
 
-				// Explode the list and trim values:
+		// Explode the list and trim values:
 		$vals = explode( ',', $vals );
 		foreach ( $vals as $word ) :
 			$stop_words[] = $this->lower_no_punc( $word );
 		endforeach;
 
-				return $stop_words;
+		$this->stop_words = $stop_words;
 	}
 
-		// Converts all words into lower-case words, sans punctuation or possessives.
-	private function lower_no_punc( $werd ) {
-		$werd = strtolower( trim( preg_replace( '#[^\p{L}\p{N}]+#u', '', $werd ) ) );
-		return $werd;
+	public function is_stop_word( $word ) {
+		return in_array( $this->stop_words, $word );
 	}
 
-		// Version update messages:
-	public function version_check() {
-		if ( get_site_option( 't2t_version' ) != $this->version ) {
-			include plugin_dir_path( __FILE__ ) . 'lib/fragments/update.php';
-			update_site_option( 't2t_version', $this->version );
-		}
+	/**
+	 * @return bool
+	 */
+	public function append_tags() {
+		return $this->append;
 	}
 
-		// Get out there and rock and roll the bones:
-	public function __construct() {
-		add_action( 'save_post', [ &$this, 'convert' ] );
-		add_action( 'admin_menu', [ &$this, 'add_menu' ] );
-		add_action( 'admin_notices', [ &$this, 'version_check' ] );
+	/**
+	 * @param bool $append
+	 */
+	public function set_append_tags() {
+		$this->append = get_option( 't2t_append' );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function get_types() {
+		return $this->types;
+	}
+
+	/**
+	 * @param array $types
+	 */
+	public function set_types() {
+		$this->types = get_option( 't2t_taxonomies' );
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function is_type( $post_type ) {
+		return in_array( $post_type, $this->types );
+	}
+
+	/**
+	 * @return mixed bool/string
+	 */
+	public function get_type( $post_type ) {
+		return in_array( $post_type, $this->types ) ? $this->types[ $post_type ] : false;
 	}
 }
