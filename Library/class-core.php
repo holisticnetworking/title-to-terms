@@ -15,12 +15,13 @@ namespace Title_To_Terms;
 class Core {
 
 	// List of WP-specific stop words (draft, etc)
-	private $ignored_statuses = array( 'draft', 'auto' );
-
-	private $version = '4.1';
-	protected $stop_words = array();
-	protected $append = false;
-	protected $types = array();
+	private $ignored_statuses   = array( 'draft', 'auto' );
+	private $ignored_types      = array( 'revision', 'nav_menu_item' );
+	private $ignored_taxonomies = array( 'post_format', 'nav_menu' );
+	private $version            = '4.1';
+	protected $stop_words       = array();
+	protected $append           = false;
+	protected $types            = array();
 
 	// Get out there and rock and roll the bones:
 	public function __construct() {
@@ -33,20 +34,22 @@ class Core {
 	}
 
 	// Convert titles to tags on save:
+
+	/**
+	 * @param $post_id
+	 */
 	public function convert_post_title( $post_id ) {
-		error_log('dude. totally.');
 		$post = get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
 		// If we have a record for this post type and if the post has a title, it's go time:
-		if ( $this->is_type( $post->post_type ) && isset( $post->post_title ) ) :
-			error_log('awe, yeah.');
+		if ( $this->is_type( $post->post_type ) && isset( $post->post_title ) ) {
+			error_log( 'awe, yeah.' );
 			$tax         = $this->get_type( $post->post_type );
 			$terms       = array();
 			$title_words = explode( ' ', $post->post_title );
-			foreach ( $title_words as $word ) :
-				// $term = preg_replace( '/[^a-z\d]+/i', '', $word );
+			foreach ( $title_words as $word ) {
 				$term = sanitize_text_field( $word );
 				$slug = $this->lower_no_punc( $word );
-				if ( ! $this->is_stop_word( $slug ) && ! $this->is_ignored_status( $slug ) ) :
+				if ( ! $this->is_stop_word( $slug ) && ! $this->is_ignored_status( $slug ) ) {
 					wp_insert_term(
 						$term,
 						$tax,
@@ -55,29 +58,28 @@ class Core {
 						)
 					);
 					$terms[] = $slug;
-				endif;
-			endforeach;
+				}
+			}
 			// Append or complete. Do not replace:
-			if ( $this->append_tags() ) :
+			if ( $this->append_tags() ) {
 				wp_set_object_terms( $post_id, $terms, $tax, true );
-			elseif ( ! $this->has_terms( $post_id, $tax ) ) :
+			} elseif ( ! $this->has_terms( $post_id, $tax ) ) {
 				wp_set_object_terms( $post_id, $terms, $tax, true );
-			endif;
-		endif;
+			}
+		}
 	}
 
 	private function has_terms( $post_id, $tax ) {
 		$terms = wp_get_post_terms( $post_id, $tax );
-		if ( empty( $terms ) ) :
+		if ( empty( $terms ) ) {
 			return false;
-		elseif ( 'category' == $tax ) :
+		} elseif ( 'category' == $tax ) {
 			$default_cat = get_option( 'default_category' );
-			if ( count( $terms ) == 1 && $terms[0]->term_id == $default_cat ) :
+			if ( count( $terms ) == 1 && $terms[0]->term_id == $default_cat ) {
 				wp_set_object_terms( $post_id, array(), $tax );
-
 				return false;
-			endif;
-		endif;
+			}
+		}
 
 		return true;
 	}
@@ -110,9 +112,9 @@ class Core {
 
 	public function settings_stop_words() {
 		$values = get_option( 'stop_words' );
-		if ( empty( $values ) ) :
+		if ( empty( $values ) ) {
 			$values = implode( ',', $this->get_stop_words() );
-		endif;
+		}
 		echo '
 		<style type="text/css">.t2t_settings { width: 0; height: 0; }</style>
 		<p><a name="t2t_settings" class="t2t_settings">&nbsp;</a>These words will be ignored by Title to Terms
@@ -136,9 +138,8 @@ class Core {
 	}
 
 	public function settings_taxonomies() {
-		$types    = get_post_types( null, 'objects' );
-		$settings = get_option( 't2t_taxonomies' );
-		// print_r( $settings );
+		$post_types = get_post_types( null, 'objects' );
+		$settings   = get_option( 't2t_taxonomies' );
 		echo '<style type="text/css">
 			fieldset.t2t_cpt {
 				margin: 20px;
@@ -146,43 +147,30 @@ class Core {
 				padding: 8px;
 			}
 		</style>';
-		foreach ( $types as $type ) :
-			if ( ! in_array( $type->name, array( 'revision', 'nav_menu_item' ) ) ) :
+		foreach ( $post_types as $type ) {
+			if ( ! $this->is_ignored_type( $type->name ) ) {
 				echo '<fieldset class="t2t_cpt"><legend>' . $type->labels->name . '</legend>';
-				$taxes = get_object_taxonomies( $type->name, 'objects' );
-				if ( ! empty( $taxes ) ) :
-					$none = empty( $settings[ $type->name ] ) ? 'checked="checked"' : '';
-					echo sprintf(
-						'<input %s type="radio" value="" id="%s-none" name="t2t_taxonomies[%s]"><label 
-                            for="%s-none">none</label><br />',
-						$none,
-						$type->name,
-						$type->name,
-						$type->name
-					);
-					foreach ( $taxes as $tax ) :
-						if ( ! in_array( $tax->name, array( 'post_format' ) ) ) :
+				$post_taxonomies = get_object_taxonomies( $type->name, 'objects' );
+				if ( ! empty( $post_taxonomies ) ) {
+					foreach ( $post_taxonomies as $tax ) {
+						if ( ! $this->is_ignored_taxonomy( $tax->name ) ) {
 							$checked = $settings[ $type->name ] == $tax->name ? 'checked="checked"' : '';
 							echo sprintf(
-								'<input %s type="radio" value="%s" id="%s-%s" name="t2t_taxonomies[%s]"><label 
-                                    for="%s-%s">%s</label><br />',
+								'<input %1$s type="radio" value="%2$s" id="%3$s-%2$s" name="t2t_taxonomies[%3$s]"><label 
+                                    for="%3$s-%2$s">%4$s</label><br />',
 								$checked,
 								$tax->name,
 								$type->name,
-								$tax->name,
-								$type->name,
-								$type->name,
-								$tax->name,
 								$tax->labels->name
 							);
-						endif;
-					endforeach;
-				else :
-					echo 'No taxonomies for this post type';
-				endif;
+						}
+					}
+				} else {
+					echo 'No taxonomies found for this post type.';
+				}
 				echo '</fieldset>';
-			endif;
-		endforeach;
+			}
+		}
 	}
 
 	// Converts all words into lower-case words, sans punctuation or possessives.
@@ -204,7 +192,22 @@ class Core {
 	 * @return array
 	 */
 	public function is_ignored_status( $status ) {
-		return in_array( $this->ignored_statuses, $status );
+		return in_array( $status, $this->ignored_statuses );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function is_ignored_type( $type ) {
+		return in_array( $type, $this->ignored_types );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function is_ignored_taxonomy( $tax ) {
+		error_log( $tax );
+		return in_array( $tax, $this->ignored_taxonomies );
 	}
 
 	/**
