@@ -14,7 +14,19 @@ namespace Title_To_Terms;
 
 class Core {
 
-	// List of WP-specific stop words (draft, etc)
+	/**
+	 * The current plugin version.
+	 * @var string
+	 */
+	private $version = '4.1';
+	/**
+	 * The pattern that matches what Title to Terms Ultimate regards as "a word".
+	 * @var string
+	 * @see https://regex101.com/r/84JOiX/2
+	 */
+	private $post_term_regex       = '/[\p{L}\p{N}-_\'.@]+|"\w+"/';
+	private $post_term_punt_regex  = '/[^\p{L}\p{N}\-_]{1,1}/';
+	private $post_term_snake_regex = '/[_\- ]+/';
 	/**
 	 * These statuses show up as slugs for posts and must be ignored.
 	 * @var array
@@ -31,11 +43,6 @@ class Core {
 	 */
 	private $ignored_taxonomies = array( 'post_format', 'nav_menu' );
 	/**
-	 * The current plugin version.
-	 * @var string
-	 */
-	private $version = '4.1';
-	/**
 	 * Unimportant words that can be ignored when creating terms.
 	 * @var array
 	 */
@@ -50,6 +57,11 @@ class Core {
 	 * @var array
 	 */
 	protected $types = array();
+	/**
+	 * The current post object.
+	 * @var mixed null|object
+	 */
+	protected $post = null;
 
 	/**
 	 * Core constructor.
@@ -68,25 +80,23 @@ class Core {
 	 * @param $post_id
 	 */
 	public function convert_post_title( $post_id ) {
-		$post = get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
+		$this->post = get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
 		// If we have a record for this post type and if the post has a title, it's go time:
-		if ( $this->is_type( $post->post_type ) && isset( $post->post_title ) ) {
-			$tax         = $this->get_type_taxonomy( $post->post_type );
-			$terms       = array();
-			$title_words = explode( ' ', $post->post_title );
-			foreach ( $title_words as $word ) {
-				$term = sanitize_text_field( $word );
+		if ( $this->is_type( $this->post->post_type ) && isset( $this->post->post_title ) ) {
+			$tax   = $this->get_type_taxonomy( $this->post->post_type );
+			$terms = array();
+			preg_match_all( $this->post_term_regex, $this->post->post_title, $title_words );
+			// error_log(print_r($title_words, true));
+			foreach ( $title_words[0] as $word ) {
+				// If we have captured a term wrapped in quotations, strip the quotation marks:
+				$word = trim( $word, '"' );
 				$slug = $this->lower_no_punc( $word );
-				if ( ! $this->is_stop_word( $slug ) && ! $this->is_ignored_status( $slug ) ) {
-					$new_term = wp_insert_term(
-						$term,
-						$tax,
-						array(
-							'slug' => $slug,
-						)
-					);
-					$terms[]  = $slug;
-				}
+				wp_insert_term(
+					$word,
+					$tax,
+					array( 'slug' => $slug )
+				);
+				$terms[] = $slug;
 			}
 			// Append or complete. Do not replace:
 			if ( $this->append_tags() ) {
@@ -95,6 +105,13 @@ class Core {
 				wp_set_object_terms( $post_id, $terms, $tax, true );
 			}
 		}
+	}
+
+	/**
+	 * Retrieves a list of words from the post title.
+	 */
+	private function create_terms_from_title() {
+
 	}
 
 	/**
@@ -226,7 +243,17 @@ class Core {
 	 * @return string
 	 */
 	private function lower_no_punc( $werd ) {
-		$werd = strtolower( trim( preg_replace( '#[^\p{L}\p{N}]+#u', '', $werd ) ) );
+		$werd = preg_replace(
+			array(
+				$this->post_term_punt_regex,
+				$this->post_term_snake_regex,
+			),
+			array(
+				'',
+				'_',
+			),
+			$werd
+		);
 		return $werd;
 	}
 
