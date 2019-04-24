@@ -15,15 +15,45 @@ namespace Title_To_Terms;
 class Core {
 
 	// List of WP-specific stop words (draft, etc)
-	private $ignored_statuses   = array( 'draft', 'auto' );
-	private $ignored_types      = array( 'revision', 'nav_menu_item' );
+	/**
+	 * These statuses show up as slugs for posts and must be ignored.
+	 * @var array
+	 */
+	private $ignored_statuses = array( 'draft', 'auto' );
+	/**
+	 * These post types can be ignored.
+	 * @var array
+	 */
+	private $ignored_types = array( 'revision', 'nav_menu_item' );
+	/**
+	 * These taxonomies are internal to WordPress and can be ignored.
+	 * @var array
+	 */
 	private $ignored_taxonomies = array( 'post_format', 'nav_menu' );
-	private $version            = '4.1';
-	protected $stop_words       = array();
-	protected $append           = false;
-	protected $types            = array();
+	/**
+	 * The current plugin version.
+	 * @var string
+	 */
+	private $version = '4.1';
+	/**
+	 * Unimportant words that can be ignored when creating terms.
+	 * @var array
+	 */
+	protected $stop_words = array();
+	/**
+	 * Whether to append new terms or to just ignore posts with terms already set.
+	 * @var bool
+	 */
+	protected $append = false;
+	/**
+	 * An array of key/value pairs, post type:taxonomy
+	 * @var array
+	 */
+	protected $types = array();
 
-	// Get out there and rock and roll the bones:
+	/**
+	 * Core constructor.
+	 */
 	public function __construct() {
 		$this->set_stop_words();
 		$this->set_append_tags();
@@ -33,9 +63,8 @@ class Core {
 		add_action( 'admin_notices', [ &$this, 'check_version' ] );
 	}
 
-	// Convert titles to tags on save:
-
 	/**
+	 * Convert titles to tags on save:
 	 * @param $post_id
 	 */
 	public function convert_post_title( $post_id ) {
@@ -56,8 +85,7 @@ class Core {
 							'slug' => $slug,
 						)
 					);
-					error_log(print_r($new_term, true));
-					$terms[] = $slug;
+					$terms[]  = $slug;
 				}
 			}
 			// Append or complete. Do not replace:
@@ -66,11 +94,16 @@ class Core {
 			} elseif ( ! $this->has_terms( $post_id, $tax ) ) {
 				wp_set_object_terms( $post_id, $terms, $tax, true );
 			}
-		} else {
-			error_log($post->post_type . ': ' . $post->post_title);
 		}
 	}
 
+	/**
+	 * Does the current post already have terms applied to it?
+	 * @param $post_id
+	 * @param $tax
+	 *
+	 * @return bool
+	 */
 	private function has_terms( $post_id, $tax ) {
 		$terms = wp_get_post_terms( $post_id, $tax );
 		if ( empty( $terms ) ) {
@@ -86,7 +119,9 @@ class Core {
 		return true;
 	}
 
-	// Display options page:
+	/**
+	 * Add admin settings page
+	 */
 	public function add_menu() {
 		add_settings_field(
 			'stop_words',
@@ -112,6 +147,9 @@ class Core {
 		register_setting( 'writing', 't2t_version' );
 	}
 
+	/**
+	 * Settings API callback for stop words
+	 */
 	public function settings_stop_words() {
 		$values = get_option( 'stop_words' );
 		if ( empty( $values ) ) {
@@ -130,6 +168,9 @@ class Core {
 		);
 	}
 
+	/**
+	 * Settings API callback for appending terms
+	 */
 	public function settings_append() {
 		$value   = get_option( 't2t_append' );
 		$checked = ( $value ) ? 'checked="checked"' : '';
@@ -139,6 +180,9 @@ class Core {
 		    preexisting tags.';
 	}
 
+	/**
+	 * Settings API callback for the taxonomy/posts matrix.
+	 */
 	public function settings_taxonomies() {
 		$post_types = get_post_types( null, 'objects' );
 		$settings   = get_option( 't2t_taxonomies' );
@@ -175,14 +219,21 @@ class Core {
 		}
 	}
 
-	// Converts all words into lower-case words, sans punctuation or possessives.
+	/**
+	 * As advertised, convert term to a lower case, no punctuation work
+	 * @param $werd
+	 *
+	 * @return string
+	 */
 	private function lower_no_punc( $werd ) {
 		$werd = strtolower( trim( preg_replace( '#[^\p{L}\p{N}]+#u', '', $werd ) ) );
-
 		return $werd;
 	}
 
-	// Version update messages:
+	/**
+	 * If admins should receive notifications upon updating this particular version,
+	 * that announcement is made here.
+	 */
 	public function check_version() {
 		if ( get_site_option( 't2t_version' ) != $this->version ) {
 			include plugin_dir_path( __FILE__ ) . '/fragments/update.php';
@@ -191,27 +242,37 @@ class Core {
 	}
 
 	/**
-	 * @return array
+	 * Is the status ignored?
+	 * @param $status
+	 *
+	 * @return bool
 	 */
 	public function is_ignored_status( $status ) {
 		return in_array( $status, $this->ignored_statuses );
 	}
 
 	/**
-	 * @return array
+	 * Is this post type ignored?
+	 * @param $type
+	 *
+	 * @return bool
 	 */
 	public function is_ignored_type( $type ) {
 		return in_array( $type, $this->ignored_types );
 	}
 
 	/**
-	 * @return array
+	 * Is this taxonomy ignored?
+	 * @param $tax
+	 *
+	 * @return bool
 	 */
 	public function is_ignored_taxonomy( $tax ) {
 		return in_array( $tax, $this->ignored_taxonomies );
 	}
 
 	/**
+	 * Return the list of stop words.
 	 * @return array
 	 */
 	public function get_stop_words() {
@@ -219,7 +280,7 @@ class Core {
 	}
 
 	/**
-	 *
+	 * Pulls a list of stop words either from the database or from a default list.
 	 */
 	public function set_stop_words() {
 		$stop_words = array();
@@ -240,11 +301,18 @@ class Core {
 		$this->stop_words = $stop_words;
 	}
 
+	/**
+	 * Does this word exist in our list of stop words?
+	 * @param $word
+	 *
+	 * @return bool
+	 */
 	public function is_stop_word( $word ) {
 		return in_array( $word, $this->stop_words );
 	}
 
 	/**
+	 * Does the user intend for new terms to be appended to the current list?
 	 * @return bool
 	 */
 	public function append_tags() {
@@ -252,41 +320,54 @@ class Core {
 	}
 
 	/**
-	 * @param bool $append
+	 * Pull the value from the database.
 	 */
 	public function set_append_tags() {
 		$this->append = get_option( 't2t_append' );
 	}
 
 	/**
+	 * Return our list of post types.
 	 * @return array
 	 */
 	public function get_types() {
 		return $this->types;
 	}
 
+	/**
+	 * Return the taxonomy for which the given type is to be checked.
+	 * @param $type
+	 *
+	 * @return mixed
+	 */
 	public function get_type_taxonomy( $type ) {
 		return $this->types[ $type ];
 	}
 
 	/**
-	 * @param array $types
+	 * Pull the current list of taxonomies and types from the database.
 	 */
 	public function set_types() {
 		$this->types = get_option( 't2t_taxonomies' );
 	}
 
 	/**
-	 * @return boolean
+	 * Is this post type one we're creating terms for?
+	 * @param $post_type
+	 *
+	 * @return bool
 	 */
 	public function is_type( $post_type ) {
 		return key_exists( $post_type, $this->types );
 	}
 
 	/**
-	 * @return mixed bool/string
+	 * Return the entry for the given post type.
+	 * @param $post_type
+	 *
+	 * @return bool|mixed
 	 */
 	public function get_type( $post_type ) {
-		return in_array( $post_type, $this->types ) ? $this->types[ $post_type ] : false;
+		return array_key_exists( $post_type, $this->types ) ? $this->types[ $post_type ] : false;
 	}
 }
