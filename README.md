@@ -49,6 +49,10 @@ Yes. Simply delete the current list of stop words, and Title to Tags will replac
 
 Maybe. It will not handle the process automatically, but if you open any untagged post and save it, Titles to Tags will work.
 
+#### Why won't this plugin tag the words "Auto" or "Draft"? 
+
+Autosaved drafts in WordPress get saved with the title of "Auto Draft". As such, we need to add those words to our stop list.
+
 ## Screenshots
 
 1. The Plugins page showing the Title to Tags plugin pre-activation.

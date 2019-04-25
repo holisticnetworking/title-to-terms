@@ -24,9 +24,23 @@ class Core {
 	 * @var string
 	 * @see https://regex101.com/r/84JOiX/2
 	 */
-	private $post_term_regex       = '/[\p{L}\p{N}-_\'.@]+|"\w+"/';
-	private $post_term_punt_regex  = '/[^\p{L}\p{N}\-_]{1,1}/';
+	private $post_term_regex = '/[\p{L}\p{N}-_\'.@]+/';
+	/**
+	 * Use to find and remove punctuation from slugs.
+	 * @see https://regex101.com/r/PMQ6UF/1
+	 * @var string
+	 */
+	private $post_term_punc_regex = '/[^\p{L}\p{N}\-_]{1,1}/';
+	/**
+	 * Used to convert spaces and dashes to snake_case slugs
+	 * @var string
+	 */
 	private $post_term_snake_regex = '/[_\- ]+/';
+	/**
+	 * Punctuation need not apply.
+	 * @var string
+	 */
+	private $post_trim_characters = '".?!"';
 	/**
 	 * These statuses show up as slugs for posts and must be ignored.
 	 * @var array
@@ -42,6 +56,11 @@ class Core {
 	 * @var array
 	 */
 	private $ignored_taxonomies = array( 'post_format', 'nav_menu' );
+	/**
+	 * Auto and Draft.
+	 * @var array
+	 */
+	private $ignored_terms = array( 'auto', 'draft' );
 	/**
 	 * Unimportant words that can be ignored when creating terms.
 	 * @var array
@@ -86,23 +105,26 @@ class Core {
 			$tax   = $this->get_type_taxonomy( $this->post->post_type );
 			$terms = array();
 			preg_match_all( $this->post_term_regex, $this->post->post_title, $title_words );
-			// error_log(print_r($title_words, true));
-			foreach ( $title_words[0] as $word ) {
-				// If we have captured a term wrapped in quotations, strip the quotation marks:
-				$word = trim( $word, '"' );
-				$slug = $this->lower_no_punc( $word );
-				wp_insert_term(
-					$word,
-					$tax,
-					array( 'slug' => $slug )
-				);
-				$terms[] = $slug;
-			}
-			// Append or complete. Do not replace:
-			if ( $this->append_tags() ) {
-				wp_set_object_terms( $post_id, $terms, $tax, true );
-			} elseif ( ! $this->has_terms( $post_id, $tax ) ) {
-				wp_set_object_terms( $post_id, $terms, $tax, true );
+			if ( ! empty( $title_words ) ) {
+				foreach ( $title_words[0] as $word ) {
+					// If we have captured a term wrapped in quotations, strip the quotation marks:
+					$word = trim( $word, $this->post_trim_characters );
+					$slug = $this->lower_no_punc( $word );
+					if ( ! in_array( strtolower( $word ), $this->stop_words ) ) {
+						wp_insert_term(
+							$word,
+							$tax,
+							array( 'slug' => $slug )
+						);
+						$terms[] = $slug;
+					}
+				}
+				// Append or complete. Do not replace:
+				if ( $this->append_tags() ) {
+					wp_set_object_terms( $post_id, $terms, $tax, true );
+				} elseif ( ! $this->has_terms( $post_id, $tax ) ) {
+					wp_set_object_terms( $post_id, $terms, $tax, true );
+				}
 			}
 		}
 	}
@@ -245,7 +267,7 @@ class Core {
 	private function lower_no_punc( $werd ) {
 		$werd = preg_replace(
 			array(
-				$this->post_term_punt_regex,
+				$this->post_term_punc_regex,
 				$this->post_term_snake_regex,
 			),
 			array(
@@ -324,6 +346,9 @@ class Core {
 		foreach ( $vals as $word ) :
 			$stop_words[] = $this->lower_no_punc( $word );
 		endforeach;
+
+		// Add our plugin-wide watch terms:
+		$stop_words = array_merge( $stop_words, $this->ignored_terms );
 
 		$this->stop_words = $stop_words;
 	}
