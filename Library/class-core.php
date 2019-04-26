@@ -96,12 +96,16 @@ class Core {
 		$this->set_append_tags();
 		$this->set_types();
 		$this->set_possessives();
-		add_action( 'save_post', [ &$this, 'convert_post_title' ] );
+		// add_action( 'save_post', [ &$this, 'convert_post_title' ] );
+		add_action( 'transition_post_status', [ &$this, 'convert_post_title' ], 10, 3 );
 		add_action( 'admin_menu', [ &$this, 'add_menu' ] );
 		add_action( 'admin_notices', [ &$this, 'check_version' ] );
 		add_action( 'admin_init', [ &$this, 'admin_enqueue' ] );
 	}
 
+	/**
+	 * Adding styles to the admin areas
+	 */
 	public function admin_enqueue() {
 		if ( is_admin() ) {
 			wp_enqueue_style(
@@ -112,42 +116,94 @@ class Core {
 	}
 
 	/**
-	 * Convert titles to tags on save:
-	 * @param $post_id
+	 * Convert titles to tags on post transition
+	 * @param $new_status
+	 * @param $old_status
+	 * @param $post
 	 */
-	public function convert_post_title( $post_id ) {
-		$this->post = get_post( wp_is_post_revision( $post_id ) ? wp_is_post_revision( $post_id ) : $post_id );
+	public function convert_post_title( $new_status, $old_status, $post ) {
+		$this->post = $post;
 		// If we have a record for this post type and if the post has a title, it's go time:
-		if ( $this->is_type( $this->post->post_type ) && isset( $this->post->post_title ) ) {
+		if ( $this->maybe_convert_post( $new_status ) ) {
 			$tax   = $this->get_type_taxonomy( $this->post->post_type );
 			$terms = array();
 			preg_match_all( $this->post_term_regex, $this->post->post_title, $title_words );
 			if ( ! empty( $title_words ) ) {
 				foreach ( $title_words[0] as $word ) {
-					// If we have captured a term wrapped in quotations, strip the quotation marks:
+					// Removes ending punctuation:
 					$word = trim( $word, $this->post_trim_characters );
+					if ( 'remove' == $this->possessives ) {
+						$word = preg_replace( "/'s/", '', $word );
+					}
 					$slug = $this->simplify_term( $word );
-					if ( ! in_array( strtolower( $word ), $this->stop_words ) ) {
-						wp_insert_term(
+					if ( ! in_array( $slug, $this->stop_words ) && ! in_array( $slug, $this->ignored_terms ) ) {
+						$added = wp_insert_term(
 							$word,
 							$tax,
 							array( 'slug' => $slug )
 						);
-						$terms[] = $slug;
+						if ( is_wp_error( $added ) ) {
+							$added = get_term_by( 'name', $word, $tax, ARRAY_A );
+						}
+						$terms[] = $added['term_id'];
 					}
 				}
 				// Append or complete. Do not replace:
 				if ( $this->append_tags() ) {
-					wp_set_object_terms( $post_id, $terms, $tax, true );
-				} elseif ( ! $this->has_terms( $post_id, $tax ) ) {
-					wp_set_object_terms( $post_id, $terms, $tax, true );
+					wp_set_object_terms( $this->post->ID, $terms, $tax, true );
+				} else {
+					wp_set_object_terms( $this->post->ID, $terms, $tax, false );
 				}
 			}
 		}
 	}
 
 	/**
+	 * Determines if we need to do anything with the post, or not.
+	 * @param $status
+	 *
+	 * @return bool
+	 */
+	private function maybe_convert_post( $status ) {
+		// Don't save autodrafts, empty post titles or
+		// post types we aren't configured to accept:
+		if (
+			! in_array( $status, array( 'auto-draft', 'inherit', 'trash' ) ) &&
+			$this->is_type( $this->post->post_type ) &&
+			! empty( $this->post->post_title ) ) {
+			$post_id = $this->post->ID;
+			$tax     = $this->get_type_taxonomy( $this->post->post_type );
+			if ( ! $this->has_terms( $post_id, $tax ) || $this->append_tags() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Convert term to a lower case, no punctuation work
+	 * @param $werd
+	 *
+	 * @return string
+	 */
+	private function simplify_term( $werd ) {
+		$werd = preg_replace(
+			array(
+				$this->post_term_punc_regex,
+				$this->post_term_snake_regex,
+			),
+			array(
+				'',
+				'_',
+			),
+			$werd
+		);
+		return strtolower( $werd );
+	}
+
+	/**
 	 * Does the current post already have terms applied to it?
+	 * Note that for categories, a default category is assigned by WP
 	 * @param $post_id
 	 * @param $tax
 	 *
@@ -184,22 +240,24 @@ class Core {
 			[ &$this, 'settings_append' ],
 			'writing'
 		);
-		add_settings_field(
-			't2t_taxonomies',
-			'Title to Terms: Taxonomies and Post Types',
-			[ &$this, 'settings_types' ],
-			'writing'
-		);
+
 		add_settings_field(
 			't2t_possessives',
 			'Title to Terms: Possessive Nouns',
 			[ &$this, 'settings_possessives' ],
 			'writing'
 		);
+		add_settings_field(
+			't2t_taxonomies',
+			'Title to Terms: Taxonomies and Post Types',
+			[ &$this, 'settings_types' ],
+			'writing'
+		);
 		register_setting( 'writing', 'stop_words' );
 		register_setting( 'writing', 't2t_append' );
 		register_setting( 'writing', 't2t_taxonomies' );
 		register_setting( 'writing', 't2t_version' );
+		register_setting( 'writing', 't2t_possessives' );
 	}
 
 	/**
@@ -266,32 +324,13 @@ class Core {
 	 * Settings API callback for appending terms
 	 */
 	public function settings_possessives() {
-		$value   = get_option( 't2t_possessives' );
-		$checked = ( $value ) ? 'checked="checked"' : '';
-		echo '<p>When Titles to Terms Ultimate encounters a possessive noun:</p>
-		<input type="checkbox" name="t2t_possessives" id="t2t_append" ' . $checked . ' /> append Title to Terms to  preexisting tags.';
+		?>
+		<p>When Title to Tags encounters a possessive noun, it will:</p>
+		<label for="t2t_possessives"><input <?php if ( 'preserve' == $this->possessives ) { echo 'checked'; } ?> type="radio" name="t2t_possessives" value="preserve">Preserve the 's</label>
+		<label for="t2t_possessives"><input <?php if ( 'remove' == $this->possessives ) { echo 'checked'; } ?> type="radio" name="t2t_possessives" value="remove">Remove the 's</label>
+		<?php
 	}
 
-	/**
-	 * Convert term to a lower case, no punctuation work
-	 * @param $werd
-	 *
-	 * @return string
-	 */
-	private function simplify_term( $werd ) {
-		$werd = preg_replace(
-			array(
-				$this->post_term_punc_regex,
-				$this->post_term_snake_regex,
-			),
-			array(
-				'',
-				'_',
-			),
-			$werd
-		);
-		return $werd;
-	}
 
 	/**
 	 * If admins should receive notifications upon updating this particular version,
@@ -448,6 +487,6 @@ class Core {
 	 * @param string $possessives
 	 */
 	public function set_possessives() {
-		$this->possessives = get_option( 't2t_possessives' );
+		$this->possessives = get_option( 't2t_possessives', 'remove' );
 	}
 }
