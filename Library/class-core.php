@@ -281,11 +281,12 @@ class Core {
 	 */
 	public function settings_append() {
 		$value   = $this->append_tags();
-		$checked = ( $value ) ? 'checked="checked"' : '';
-		echo '<p>Choose whether to add tags to untagged content, or to append new Title 2 Tags, even if there are tags 
-            already present.</p>
-		<input type="checkbox" name="t2t_append" id="t2t_append" ' . $checked . ' /> append Title to Terms to 
-		    preexisting tags.';
+		$checked = ! empty( $value ) ? 'checked="checked"' : '';
+		?>
+		<p>When Title to Terms encounters a post with terms already applied to it:</p>
+		<label for="t2t_append"><input value="1" type="radio" name="t2t_append" id="t2t_append"<?php if ( ! empty( $value ) ) { echo ' checked '; } ?>/>Append terms to the list of tags.</label>
+		<label for="t2t_append"><input value="0" type="radio" name="t2t_append" id="t2t_append"<?php if ( empty( $value ) ) { echo ' checked '; } ?>/>Do nothing</label>
+		<?php
 	}
 
 	/**
