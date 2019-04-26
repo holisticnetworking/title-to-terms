@@ -33,6 +33,7 @@ class Core {
 	private $post_term_punc_regex = '/[^\p{L}\p{N}\-_]{1,1}/';
 	/**
 	 * Used to convert spaces and dashes to snake_case slugs
+	 * @xee https://regex101.com/r/mkMgWi/1/
 	 * @var string
 	 */
 	private $post_term_snake_regex = '/[_\- ]+/';
@@ -77,6 +78,11 @@ class Core {
 	 */
 	protected $types = array();
 	/**
+	 * How we will deal with possessive nouns.
+	 * @var string
+	 */
+	protected $possessives = null;
+	/**
 	 * The current post object.
 	 * @var mixed null|object
 	 */
@@ -89,9 +95,20 @@ class Core {
 		$this->set_stop_words();
 		$this->set_append_tags();
 		$this->set_types();
+		$this->set_possessives();
 		add_action( 'save_post', [ &$this, 'convert_post_title' ] );
 		add_action( 'admin_menu', [ &$this, 'add_menu' ] );
 		add_action( 'admin_notices', [ &$this, 'check_version' ] );
+		add_action( 'admin_init', [ &$this, 'admin_enqueue' ] );
+	}
+
+	public function admin_enqueue() {
+		if ( is_admin() ) {
+			wp_enqueue_style(
+				't2t_style',
+				plugins_url( '/Resource/css/admin.css', dirname( __FILE__ ) )
+			);
+		}
 	}
 
 	/**
@@ -109,7 +126,7 @@ class Core {
 				foreach ( $title_words[0] as $word ) {
 					// If we have captured a term wrapped in quotations, strip the quotation marks:
 					$word = trim( $word, $this->post_trim_characters );
-					$slug = $this->lower_no_punc( $word );
+					$slug = $this->simplify_term( $word );
 					if ( ! in_array( strtolower( $word ), $this->stop_words ) ) {
 						wp_insert_term(
 							$word,
@@ -127,13 +144,6 @@ class Core {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Retrieves a list of words from the post title.
-	 */
-	private function create_terms_from_title() {
-
 	}
 
 	/**
@@ -177,7 +187,13 @@ class Core {
 		add_settings_field(
 			't2t_taxonomies',
 			'Title to Terms: Taxonomies and Post Types',
-			[ &$this, 'settings_taxonomies' ],
+			[ &$this, 'settings_types' ],
+			'writing'
+		);
+		add_settings_field(
+			't2t_possessives',
+			'Title to Terms: Possessive Nouns',
+			[ &$this, 'settings_possessives' ],
 			'writing'
 		);
 		register_setting( 'writing', 'stop_words' );
@@ -190,13 +206,8 @@ class Core {
 	 * Settings API callback for stop words
 	 */
 	public function settings_stop_words() {
-		$values = get_option( 'stop_words' );
-		if ( empty( $values ) ) {
-			$values = implode( ',', $this->get_stop_words() );
-		}
-		echo '
-		<style type="text/css">.t2t_settings { width: 0; height: 0; }</style>
-		<p><a name="t2t_settings" class="t2t_settings">&nbsp;</a>These words will be ignored by Title to Terms
+		$values = implode( ',', $this->get_stop_words() );
+		echo '<p><a name="t2t_settings" class="t2t_settings">&nbsp;</a>These words will be ignored by Title to Terms
 		 (punctuation removed). <em>To reset, simply delete all values here and the default list will be
 		 restored.</em></p>
 		<textarea rows="6" cols="100" name="stop_words" id="stop_words">' . $values . '</textarea>
@@ -211,7 +222,7 @@ class Core {
 	 * Settings API callback for appending terms
 	 */
 	public function settings_append() {
-		$value   = get_option( 't2t_append' );
+		$value   = $this->append_tags();
 		$checked = ( $value ) ? 'checked="checked"' : '';
 		echo '<p>Choose whether to add tags to untagged content, or to append new Title 2 Tags, even if there are tags 
             already present.</p>
@@ -222,16 +233,9 @@ class Core {
 	/**
 	 * Settings API callback for the taxonomy/posts matrix.
 	 */
-	public function settings_taxonomies() {
+	public function settings_types() {
 		$post_types = get_post_types( null, 'objects' );
-		$settings   = get_option( 't2t_taxonomies' );
-		echo '<style type="text/css">
-			fieldset.t2t_cpt {
-				margin: 20px;
-				border: 2px solid #aaa;
-				padding: 8px;
-			}
-		</style>';
+		$settings   = $this->types;
 		foreach ( $post_types as $type ) {
 			if ( ! $this->is_ignored_type( $type->name ) ) {
 				echo '<fieldset class="t2t_cpt"><legend>' . $type->labels->name . '</legend>';
@@ -259,12 +263,22 @@ class Core {
 	}
 
 	/**
-	 * As advertised, convert term to a lower case, no punctuation work
+	 * Settings API callback for appending terms
+	 */
+	public function settings_possessives() {
+		$value   = get_option( 't2t_possessives' );
+		$checked = ( $value ) ? 'checked="checked"' : '';
+		echo '<p>When Titles to Terms Ultimate encounters a possessive noun:</p>
+		<input type="checkbox" name="t2t_possessives" id="t2t_append" ' . $checked . ' /> append Title to Terms to  preexisting tags.';
+	}
+
+	/**
+	 * Convert term to a lower case, no punctuation work
 	 * @param $werd
 	 *
 	 * @return string
 	 */
-	private function lower_no_punc( $werd ) {
+	private function simplify_term( $werd ) {
 		$werd = preg_replace(
 			array(
 				$this->post_term_punc_regex,
@@ -344,7 +358,7 @@ class Core {
 		// Explode the list and trim values:
 		$vals = explode( ',', $vals );
 		foreach ( $vals as $word ) :
-			$stop_words[] = $this->lower_no_punc( $word );
+			$stop_words[] = $this->simplify_term( $word );
 		endforeach;
 
 		// Add our plugin-wide watch terms:
@@ -421,5 +435,19 @@ class Core {
 	 */
 	public function get_type( $post_type ) {
 		return array_key_exists( $post_type, $this->types ) ? $this->types[ $post_type ] : false;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_possessives() {
+		return $this->possessives;
+	}
+
+	/**
+	 * @param string $possessives
+	 */
+	public function set_possessives() {
+		$this->possessives = get_option( 't2t_possessives' );
 	}
 }
