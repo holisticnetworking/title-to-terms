@@ -2,7 +2,7 @@
 
 Contributors: dragonflyeye
 Tags: automation, taxonomy, categories, tags
-Requires at least: 3.0
+Requires at least: 5.0
 Tested up to: 5.1.1
 Requires PHP: 7.0
 Stable tag: 4.1
