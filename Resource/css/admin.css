@@ -1,0 +1,12 @@
+.t2t_settings {
+	width: 0; height: 0;
+}
+fieldset.t2t_cpt {
+	margin: 20px;
+	border: 2px solid #aaa;
+	padding: 8px;
+}
+
+input#t2t_character_count {
+	text-align: center;
+}

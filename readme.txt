@@ -1,11 +1,11 @@
 === Title to Terms Ultimate ===
 
 Contributors: dragonflyeye
-Tags: automation, automate, automatic, taxonomy, categories, tags
-Requires at least: 3.0
-Tested up to: 4.9
-Requires PHP: 5.2.4
-Stable tag: 4.0
+Tags: automation, taxonomy, categories, tags
+Requires at least: 5.0
+Tested up to: 5.1.1
+Requires PHP: 7.0
+Stable tag: 4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ Yes. Simply delete the current list of stop words, and Title to Tags will replac
 
 Maybe. It will not handle the process automatically, but if you open any untagged post and save it, Titles to Tags will work.
 
+= Why won't this plugin tag the words "Auto" or "Draft"? =
+
+Autosaved drafts in WordPress get saved with the title of "Auto Draft". As such, we need to add those words to our stop list.
+
 == Screenshots ==
 
 1. The Plugins page showing the Title to Tags plugin pre-activation.
@@ -94,6 +98,9 @@ Maybe. It will not handle the process automatically, but if you open any untagge
 * 4.0 ~ Changed name to Titles to Terms Ultimate, reflecting newly updated code.
 	~ T2TU now allows one taxonomy per post type to be auto-populated by title-generated terms.
 	~ User-selectable taxonomy for each post type registered to WordPress, and each taxonomy registered to that post type.
+* 4.1 ~ Refactoring code for efficiency and caching. Also:
+        ~ Creating option to either maintain possessive apostrophes or not.
+        ~ Creating a minimum length option, so smaller words do not get converted.
 
 == Upgrade Notice ==
 
