@@ -100,6 +100,7 @@ Autosaved drafts in WordPress get saved with the title of "Auto Draft". As such,
 	~ User-selectable taxonomy for each post type registered to WordPress, and each taxonomy registered to that post type.
 * 4.1 ~ Refactoring code for efficiency and caching. Also:
         ~ Creating option to either maintain possessive apostrophes or not.
+        ~ Creating a minimum length option, so smaller words do not get converted.
 
 == Upgrade Notice ==
 
