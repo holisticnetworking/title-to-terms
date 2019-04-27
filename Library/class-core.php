@@ -24,7 +24,7 @@ class Core {
 	 * @var string
 	 * @see https://regex101.com/r/84JOiX/2
 	 */
-	private $post_term_regex = '/[\p{L}\p{N}-_\'.@]+/';
+	private $post_term_regex = '/[\p{L}\p{N}-_\'.@]{%d,}/';
 	/**
 	 * Use to find and remove punctuation from slugs.
 	 * @see https://regex101.com/r/PMQ6UF/1
@@ -68,6 +68,12 @@ class Core {
 	 */
 	protected $stop_words = array();
 	/**
+	 * The minimum character count in a taggable word.
+	 * @var int
+	 */
+	protected $character_count = 3;
+
+	/**
 	 * Whether to append new terms or to just ignore posts with terms already set.
 	 * @var bool
 	 */
@@ -93,6 +99,7 @@ class Core {
 	 */
 	public function __construct() {
 		$this->set_stop_words();
+		$this->set_character_count();
 		$this->set_append_tags();
 		$this->set_types();
 		$this->set_possessives();
@@ -235,6 +242,12 @@ class Core {
 			'writing'
 		);
 		add_settings_field(
+			'character_count',
+			'Title to Terms: Minimum characters',
+			[ &$this, 'settings_character_count' ],
+			'writing'
+		);
+		add_settings_field(
 			't2t_append',
 			'Title to Terms: Append Tags',
 			[ &$this, 'settings_append' ],
@@ -254,6 +267,7 @@ class Core {
 			'writing'
 		);
 		register_setting( 'writing', 'stop_words' );
+		register_setting( 'writing', 't2t_character_count' );
 		register_setting( 'writing', 't2t_append' );
 		register_setting( 'writing', 't2t_taxonomies' );
 		register_setting( 'writing', 't2t_version' );
@@ -274,6 +288,17 @@ class Core {
 			'<input type="hidden" name="t2t_version" value="%s" />',
 			$this->version
 		);
+	}
+
+	/**
+	 * Settings API callback for appending terms
+	 */
+	public function settings_character_count() {
+		$value   = $this->get_character_count();
+		$checked = ! empty( $value ) ? 'checked="checked"' : '';
+		?>
+		<label for="t2t_append">Do not tag words smaller than <input name="t2t_character_count" id="t2t_character_count" size="4" value="<?php echo $value; ?>"> characters. (clear for no minimum.)</label>
+		<?php
 	}
 
 	/**
@@ -418,6 +443,24 @@ class Core {
 	}
 
 	/**
+	 * @return int
+	 */
+	public function get_character_count() {
+		return $this->character_count;
+	}
+
+	/**
+	 *
+	 */
+	public function set_character_count() {
+		$this->character_count = intval( get_option( 't2t_character_count', 3 ) );
+		$this->post_term_regex = sprintf(
+			$this->post_term_regex,
+			$this->character_count
+		);
+	}
+
+	/**
 	 * Does the user intend for new terms to be appended to the current list?
 	 * @return bool
 	 */
@@ -429,7 +472,7 @@ class Core {
 	 * Pull the value from the database.
 	 */
 	public function set_append_tags() {
-		$this->append = get_option( 't2t_append' );
+		$this->append = get_option( 't2t_append'. false );
 	}
 
 	/**
@@ -454,7 +497,7 @@ class Core {
 	 * Pull the current list of taxonomies and types from the database.
 	 */
 	public function set_types() {
-		$this->types = get_option( 't2t_taxonomies' );
+		$this->types = get_option( 't2t_taxonomies', array() );
 	}
 
 	/**
