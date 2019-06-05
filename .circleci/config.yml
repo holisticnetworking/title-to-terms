@@ -27,4 +27,38 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       - image: circleci/mysql:5.7.22-ram
     steps:
-      - checkout
+      - run:
+          name: Install WordPress
+          command: |
+            # set +eo pipefail
+            # set -x
+
+            # Get WP-cli
+            curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+
+            # Install WordPress
+            php wp-cli.phar core install \
+              --url=$WP_TEST_URL \
+              --title='Test' \
+              --admin_user=$WP_TEST_USER \
+              --admin_password=$WP_TEST_USER_PASS \
+              --admin_email="$WP_TEST_USER@wordpress.dev" \
+              --path=htdocs/wordpress
+
+            # Get the database
+            sshpass -e ssh -q -o StrictHostKeyChecking=no USER@TARGET.domain -p 10349 'wp db export - --single-transaction' > database.sql
+            mysql -h 127.0.0.1 -u root -D circle_test < database.sql
+            rm database.sql
+
+            # Activate all plugins
+            php wp-cli.phar plugin activate --all --path=htdocs/wordpress
+
+            # Get alternative router so we can do without Apache or nginx
+            cd ~/repo
+            curl -s https://raw.githubusercontent.com/Seravo/wordpress-test-template/master/lib/router.php > htdocs/router.php
+            cd htdocs
+            ls
+
+            php -S 0.0.0.0:8080 router.php &
+            sleep 2; # This randomly fixed issue with not being able to connect
+            curl -i http://localhost:8080
