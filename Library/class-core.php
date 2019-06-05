@@ -209,5 +209,6 @@ class Core {
 		add_action( 'save_post', [ &$this, 'convert' ] );
 		add_action( 'admin_menu', [ &$this, 'add_menu' ] );
 		add_action( 'admin_notices', [ &$this, 'version_check' ] );
+		return true;
 	}
 }

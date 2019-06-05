@@ -1,0 +1,28 @@
+# Loading a WordPress Docker instance.
+
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      # specify the version you desire here
+      # - image: circleci/php:7.0-fpm-node-browsers
+      - image: k1sul1/circleci-wordpress:0.0.1
+        environment:
+          - WP_TEST_URL: "http://localhost:12000"
+          - WP_TEST_USER: "test"
+          - WP_TEST_USER_PASS: "test"
+          - WP_ENV: "ci"
+          - MYSQL_ALLOW_EMPTY_PASSWORD: true,
+          - MYSQL_DATABASE: "circle_test"
+          - MYSQL_HOST: "127.0.0.1"
+          - DB_HOST: "127.0.0.1"
+          - DB_USER: "root"
+          - DB_PASSWORD: ""
+          - DB_NAME: "circle_test"
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      - image: circleci/mysql:5.7.22-ram
